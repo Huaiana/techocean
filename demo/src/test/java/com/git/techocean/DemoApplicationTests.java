@@ -1,4 +1,4 @@
-package com.git.porto;
+package com.git.techocean;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

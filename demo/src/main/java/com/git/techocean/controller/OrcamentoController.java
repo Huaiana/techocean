@@ -1,7 +1,7 @@
-package com.git.porto.controller;
+package com.git.techocean.controller;
 
-import com.git.porto.model.Orcamento;
-import com.git.porto.repository.OrcamentoRepository;
+import com.git.techocean.model.Orcamento;
+import com.git.techocean.repository.OrcamentoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

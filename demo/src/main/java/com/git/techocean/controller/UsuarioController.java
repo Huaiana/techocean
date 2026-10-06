@@ -1,7 +1,7 @@
-package com.git.porto.controller;
+package com.git.techocean.controller;
 
-import com.git.porto.model.Usuario;
-import com.git.porto.repository.UsuarioRepository;
+import com.git.techocean.model.Usuario;
+import com.git.techocean.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

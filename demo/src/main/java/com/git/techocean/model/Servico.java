@@ -1,11 +1,9 @@
-package com.git.porto.model;
+package com.git.techocean.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;    
@@ -14,21 +12,20 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+public class Servico {
 
-public class Mensagem {
-    
-    @Id
+    @Id 
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String conteudo;
+    private String nome;
 
-    @Column
-    private String resposta;
+    @Column(nullable = false)
+    private String descricao; 
 
-    @ManyToOne
-    @JoinColumn(name = "operacao_id", nullable = false)
-    private Operacao operacao;
-    
+
+    @Column(nullable = false)
+    private Double preco;
+
 }

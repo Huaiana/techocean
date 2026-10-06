@@ -1,4 +1,5 @@
-package com.git.porto.model;
+package com.git.techocean.model;
+
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,24 +9,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;    
 
-@Entity
+@Entity 
 @Getter
 @Setter
 @NoArgsConstructor
 
-public class Conteiner {
+public class Operacao {
     
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String codigo;
+    private String nome;
+
+    @Column (nullable = false)
+    private String descricao;
 
     @Column(nullable = false)
-    private String tipo;
+    private String tipo; // importação ou exportação
 
-    @Column(nullable = false)
-    private Double capacidade;
+    @Column (nullable = false)
+    private String status; // em andamento, aprovado, pendente, reprovado
     
 }

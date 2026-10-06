@@ -1,5 +1,4 @@
-package com.git.porto.model;
-
+package com.git.techocean.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,12 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;    
 
-@Entity 
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
-
-public class Operacao {
+public class Usuario {
     
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -24,12 +22,13 @@ public class Operacao {
     private String nome;
 
     @Column (nullable = false)
-    private String descricao;
+    private String CPF;
+
+    @Column(nullable = false, unique = true)
+    private String email;
 
     @Column(nullable = false)
-    private String tipo; // importação ou exportação
+    private String senha;
 
-    @Column (nullable = false)
-    private String status; // em andamento, aprovado, pendente, reprovado
     
 }

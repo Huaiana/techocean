@@ -1,6 +1,6 @@
-package com.git.porto.repository;
+package com.git.techocean.repository;
 
-import com.git.porto.model.Orcamento;
+import com.git.techocean.model.Orcamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.git.porto.model;
+package com.git.techocean.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,20 +12,20 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Servico {
 
-    @Id 
+public class Conteiner {
+    
+    @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String nome;
+    private String codigo;
 
     @Column(nullable = false)
-    private String descricao; 
-
+    private String tipo;
 
     @Column(nullable = false)
-    private Double preco;
-
+    private Double capacidade;
+    
 }

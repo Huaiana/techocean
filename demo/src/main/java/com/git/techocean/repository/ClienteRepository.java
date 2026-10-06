@@ -1,6 +1,6 @@
-package com.git.porto.repository;
+package com.git.techocean.repository;
 
-import com.git.porto.model.Cliente;
+import com.git.techocean.model.Cliente;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {

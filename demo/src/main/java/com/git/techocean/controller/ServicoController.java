@@ -1,7 +1,7 @@
-package com.git.porto.controller;
+package com.git.techocean.controller;
 
-import com.git.porto.model.Servico;
-import com.git.porto.repository.ServicoRepository;
+import com.git.techocean.model.Servico;
+import com.git.techocean.repository.ServicoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

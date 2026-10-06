@@ -1,4 +1,4 @@
-package com.git.porto.model;
+package com.git.techocean.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
