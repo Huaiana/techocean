@@ -7,7 +7,7 @@ Sistema para apresentar serviços de segurança e amarração de cargas e dispon
 O repositório contém duas aplicações:
 
 - **Site institucional** (`front-buddy-dev/`): página inicial com apresentação dos serviços, informações da empresa e contato.
-- **API** (`demo/`): aplicação Spring Boot para cadastro de clientes e funcionários, gerenciamento de serviços e solicitação e consulta de orçamentos.
+- **API** (`demo/`): aplicação Spring Boot para cadastro de clientes e usuários, gerenciamento de serviços, orçamentos e agendamentos de visitas.
 
 O site e a API são executados separadamente. A página institucional atual não depende da API para renderizar seu conteúdo.
 
@@ -79,7 +79,7 @@ Os endpoints abaixo são definidos pelos controladores do backend:
 | `POST` | `/clientes/login` | Autenticar cliente |
 | `GET` | `/clientes` | Listar clientes |
 | `PUT` | `/clientes/{id}` | Atualizar dados do cliente |
-| `POST` | `/usuarios` | Cadastrar funcionário |
+| `POST` | `/usuarios` | Cadastrar usuário |
 | `POST` | `/usuarios/login` | Autenticar funcionário |
 | `POST` | `/servicos` | Cadastrar serviço |
 | `GET` | `/servicos/listar` | Listar serviços |
@@ -88,8 +88,9 @@ Os endpoints abaixo são definidos pelos controladores do backend:
 | `POST` | `/orcamentos/solicitar` | Solicitar orçamento; inicia com status `pendente` |
 | `GET` | `/orcamentos/consultar/{clienteId}` | Consultar orçamentos de um cliente |
 | `PUT` | `/orcamentos/{id}/status?status={status}` | Alterar o status de um orçamento |
+| `POST` | `/agendamentos` | Solicitar uma visita técnica; cria o cadastro em `Usuario` quando os dados de registro são enviados |
 
-As operações que recebem dados esperam um corpo JSON. O login de funcionário recebe e-mail e senha no corpo; a atualização de status do orçamento recebe o novo status no parâmetro `status`.
+As operações que recebem dados esperam um corpo JSON. Para agendar uma visita, envie `nome`, `telefone`, `email`, `dataHora` (ISO local, por exemplo `2026-10-20T14:30`) e `confirmacao: true`. Se o e-mail já estiver cadastrado em `Usuario`, envie também `senha`. Se não houver cadastro, a API informa que o cadastro é necessário; o site encaminha o visitante para criar o usuário com CPF e senha e conclui o agendamento em seguida. A atualização de status do orçamento recebe o novo status no parâmetro `status`.
 
 ## Testes e verificações
 
