@@ -1,5 +1,5 @@
 package com.git.techocean.controller;
 
-public class MensagemController {
-    
-}
+import com.git.techocean.
+model.Mensagem
+;
