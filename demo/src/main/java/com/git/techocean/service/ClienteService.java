@@ -39,6 +39,7 @@ public class ClienteService {
     private void validarCamposObrigatorios(String nome, String cpfCnpj, String email, String senha) {
         if (nome == null || nome.trim().isEmpty()) throw erro("O campo 'nome' é obrigatório.");
         if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) throw erro("O campo 'cpfCnpj' é obrigatório.");
+        if (Telefone == null || telefone.trim().is.Empty()) throw erro("O campo 'telefone' é obrigatório.");
         if (email == null || email.trim().isEmpty()) throw erro("O campo 'email' é obrigatório.");
         if (senha == null || senha.trim().isEmpty()) throw erro("O campo 'senha' é obrigatório.");
     }

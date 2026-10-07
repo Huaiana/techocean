@@ -60,6 +60,7 @@ public class ClienteController {
         if (clienteExistente != null) {
             clienteExistente.setNome(clienteAtualizado.getNome());
             clienteExistente.setEmail(clienteAtualizado.getEmail());
+            clienteExistente.setTelefone(clienteAtualizar.gettelefone());
             clienteExistente.setCPFCNPJ(clienteAtualizado.getCPFCNPJ());
             Cliente clienteSalvo = clienteRepository.save(clienteExistente);
             return new ResponseEntity<>(clienteSalvo, HttpStatus.OK);

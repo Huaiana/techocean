@@ -22,17 +22,21 @@ public class Cliente {
     private String nome;
 
     @Column(nullable = false)
-    private String CPFCNPJ;
+    private String CPFCNPJ; // cpf xxx.xxx.xxx-xx, cnpj xx.xxx.xxx/xxxx-xx 
+
+    @Column(nullable = false)
+    private String telefone; //( ) x xxxx-xxxx
 
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
-    private String senha;
+    private String senha; // 8 ou + caracteres com numeros e letras 
 
     public Cliente(String nome, String CPFCNPJ, String email, String senha) {
         this.nome = nome;
         this.CPFCNPJ = CPFCNPJ;
+        this.telefone = telefone;
         this.email = email;
         this.senha = senha;
     }
