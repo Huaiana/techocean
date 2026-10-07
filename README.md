@@ -50,7 +50,7 @@ cd demo
 ./mvnw spring-boot:run
 ```
 
-A API Spring Boot fica disponível, por padrão, em `http://localhost:8080`. Essa porta serve os endpoints da API, não o site; abrir `http://localhost:8080/` pode retornar `404`. Para verificar a API, acesse `http://localhost:8080/clientes`.
+A API Spring Boot fica disponível, por padrão, em `http://localhost:8080`. Se essa porta já estiver ocupada no seu ambiente, a aplicação também pode rodar em `http://localhost:8081`; nesse caso, ajuste `VITE_API_URL` no site para apontar para a porta correta. Essa porta serve os endpoints da API, não o site; abrir `http://localhost:8080/` pode retornar `404`. Para verificar a API, acesse `http://localhost:8080/clientes` (ou `http://localhost:8081/clientes` se a porta foi remapeada).
 
 ### Site
 
