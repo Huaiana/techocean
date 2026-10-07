@@ -6,7 +6,7 @@ Sistema para apresentar serviços de segurança e amarração de cargas e dispon
 
 O repositório contém duas aplicações:
 
-- **Site institucional** (`front-buddy-dev/`): página inicial com apresentação dos serviços, informações da empresa e contato.
+- **Site institucional** (`techocean-web/`): página inicial com apresentação dos serviços, informações da empresa e contato.
 - **API** (`demo/`): aplicação Spring Boot para clientes e administradores, cargas, serviços, contêineres, solicitações, orçamentos, operações, mensagens e agendamentos de visitas.
 
 O site e a API são executados separadamente. A página institucional atual não depende da API para renderizar seu conteúdo.
@@ -22,7 +22,7 @@ O site e a API são executados separadamente. A página institucional atual não
 ```text
 .
 ├── demo/                 # API Java/Spring Boot e testes
-└── front-buddy-dev/      # Site institucional React
+└── techocean-web/        # Site institucional React
 ```
 
 ## Pré-requisitos
@@ -57,7 +57,7 @@ A API Spring Boot fica disponível, por padrão, em `http://localhost:8080`. Ess
 Em outro terminal:
 
 ```bash
-cd front-buddy-dev
+cd techocean-web
 npm install
 npm run dev
 ```
@@ -122,14 +122,14 @@ cd demo
 Executar os testes do site:
 
 ```bash
-cd front-buddy-dev
+cd techocean-web
 npm test
 ```
 
 Verificar o estilo do site:
 
 ```bash
-cd front-buddy-dev
+cd techocean-web
 npm run lint
 ```
 # techocean
