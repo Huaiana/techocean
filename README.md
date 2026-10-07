@@ -75,11 +75,11 @@ Os endpoints abaixo correspondem aos controladores atuais do backend. Salvo indi
 
 | Método | Endpoint | Finalidade |
 | --- | --- | --- |
-| `POST` | `/clientes?nome=...&cpfcnpj=...&email=...&senha=...` | Cadastrar cliente |
+| `POST` | `/clientes` | Cadastrar cliente (corpo JSON com `nome`, `cpf`, `telefone`, `email` e `senha`) |
 | `POST` | `/clientes/login` | Autenticar cliente (corpo JSON com `email` e `senha`) |
 | `GET` | `/clientes` | Listar clientes |
 | `GET` | `/clientes/{id}` | Buscar cliente por ID |
-| `PUT` | `/clientes/{id}` | Atualizar nome, e-mail e CPF/CNPJ (corpo JSON) |
+| `PUT` | `/clientes/{id}` | Atualizar nome, telefone, e-mail e CPF/CNPJ (corpo JSON) |
 | `POST` | `/admin/cadastrar?nome=...&email=...&senha=...&cargo=...` | Cadastrar administrador |
 | `POST` | `/admin/login` | Autenticar administrador (corpo JSON com `email` e `senha`) |
 | `POST` | `/cargas?descricao=...&peso=...&volume=...&tipoCarga=...&origem=...&destino=...` | Cadastrar carga |

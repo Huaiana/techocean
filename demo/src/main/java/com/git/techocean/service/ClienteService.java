@@ -17,14 +17,14 @@ public class ClienteService {
         this.clienteRepository = clienteRepository;
     }
 
-    public Cliente cadastrar(String nome, String cpfCnpj, String email, String senha) {
-        validarCamposObrigatorios(nome, cpfCnpj, email, senha);
+    public Cliente cadastrar(String nome, String cpfCnpj, String telefone, String email, String senha) {
+        validarCamposObrigatorios(nome, cpfCnpj, telefone, email, senha);
         
         if (clienteRepository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado");
         }
 
-        return clienteRepository.save(new Cliente(nome, cpfCnpj, email, senha));
+        return clienteRepository.save(new Cliente(nome, cpfCnpj, telefone, email, senha));
     }
 
     public List<Cliente> listar() {
@@ -36,10 +36,11 @@ public class ClienteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente " + id + " não encontrado"));
     }
 
-    private void validarCamposObrigatorios(String nome, String cpfCnpj, String email, String senha) {
+    private void validarCamposObrigatorios(
+            String nome, String cpfCnpj, String telefone, String email, String senha) {
         if (nome == null || nome.trim().isEmpty()) throw erro("O campo 'nome' é obrigatório.");
         if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) throw erro("O campo 'cpfCnpj' é obrigatório.");
-        if (Telefone == null || telefone.trim().is.Empty()) throw erro("O campo 'telefone' é obrigatório.");
+        if (telefone == null || telefone.trim().isEmpty()) throw erro("O campo 'telefone' é obrigatório.");
         if (email == null || email.trim().isEmpty()) throw erro("O campo 'email' é obrigatório.");
         if (senha == null || senha.trim().isEmpty()) throw erro("O campo 'senha' é obrigatório.");
     }

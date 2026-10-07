@@ -2,6 +2,7 @@ package com.git.techocean.controller;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,13 +23,21 @@ public class ClienteController {
     }
 
     // RF01 - Cadastrar cliente
-    @PostMapping
-    public ResponseEntity<Cliente> cadastrar(
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Cliente> cadastrar(@RequestBody CadastroClienteRequest request) {
+        Cliente cliente = clienteService.cadastrar(
+                request.nome(), request.cpf(), request.telefone(), request.email(), request.senha());
+        return new ResponseEntity<>(cliente, HttpStatus.CREATED);
+    }
+
+    @PostMapping(params = {"nome", "cpfcnpj", "telefone", "email", "senha"})
+    public ResponseEntity<Cliente> cadastrarPorParametros(
             @RequestParam String nome,
             @RequestParam String cpfcnpj,
+            @RequestParam String telefone,
             @RequestParam String email,
             @RequestParam String senha) {
-        Cliente cliente = clienteService.cadastrar(nome, cpfcnpj, email, senha);
+        Cliente cliente = clienteService.cadastrar(nome, cpfcnpj, telefone, email, senha);
         return new ResponseEntity<>(cliente, HttpStatus.CREATED);
     }
 
@@ -60,11 +69,19 @@ public class ClienteController {
         if (clienteExistente != null) {
             clienteExistente.setNome(clienteAtualizado.getNome());
             clienteExistente.setEmail(clienteAtualizado.getEmail());
-            clienteExistente.setTelefone(clienteAtualizar.gettelefone());
+            clienteExistente.setTelefone(clienteAtualizado.getTelefone());
             clienteExistente.setCPFCNPJ(clienteAtualizado.getCPFCNPJ());
             Cliente clienteSalvo = clienteRepository.save(clienteExistente);
             return new ResponseEntity<>(clienteSalvo, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    public record CadastroClienteRequest(
+            String nome,
+            String cpf,
+            String telefone,
+            String email,
+            String senha) {
     }
 }

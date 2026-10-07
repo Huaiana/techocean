@@ -33,7 +33,7 @@ public class Cliente {
     @Column(nullable = false)
     private String senha; // 8 ou + caracteres com numeros e letras 
 
-    public Cliente(String nome, String CPFCNPJ, String email, String senha) {
+    public Cliente(String nome, String CPFCNPJ, String telefone, String email, String senha) {
         this.nome = nome;
         this.CPFCNPJ = CPFCNPJ;
         this.telefone = telefone;
