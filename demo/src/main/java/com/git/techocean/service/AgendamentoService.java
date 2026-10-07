@@ -6,6 +6,7 @@ import com.git.techocean.repository.AgendamentoRepository;
 import com.git.techocean.repository.UsuarioRepository;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,6 +85,40 @@ public class AgendamentoService {
         request.setStatus(true);
         request.setUsuario(usuario);
         return agendamentoRepository.save(request);
+    }
+
+    public List<Agendamento> listar() {
+        return agendamentoRepository.findAll();
+    }
+
+    public List<Agendamento> listarPorCliente(Long clienteId) {
+        return agendamentoRepository.findByUsuarioId(clienteId);
+    }
+
+    public Agendamento buscarPorId(Long id) {
+        return agendamentoRepository.findById(id)
+                .orElseThrow(() -> new AgendamentoException(
+                        "AGENDAMENTO_NAO_ENCONTRADO",
+                        "Agendamento não encontrado.",
+                        HttpStatus.NOT_FOUND));
+    }
+
+    public Agendamento atualizarStatus(Long id, String status) {
+        boolean confirmado;
+        if ("confirmado".equalsIgnoreCase(status) || "true".equalsIgnoreCase(status)) {
+            confirmado = true;
+        } else if ("pendente".equalsIgnoreCase(status) || "false".equalsIgnoreCase(status)) {
+            confirmado = false;
+        } else {
+            throw new AgendamentoException(
+                    "STATUS_INVALIDO",
+                    "Status deve ser confirmado ou pendente.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        Agendamento agendamento = buscarPorId(id);
+        agendamento.setStatus(confirmado);
+        return agendamentoRepository.save(agendamento);
     }
 
     private boolean isBlank(String value) {

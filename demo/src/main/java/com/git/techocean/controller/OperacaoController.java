@@ -1,51 +1,46 @@
 package com.git.techocean.controller;
 
-import com.git.techocean.model.Operacao;
-import com.git.techocean.repository.OperacaoRepository;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.git.techocean.model.Operacao;
+import com.git.techocean.service.OperacaoService;
 
 @RestController
 @RequestMapping("/operacoes")
 public class OperacaoController {
 
-    private final OperacaoRepository operacaoRepository;
+    private final OperacaoService operacaoService;
 
-    public OperacaoController(OperacaoRepository operacaoRepository) {
-        this.operacaoRepository = operacaoRepository;
+    public OperacaoController(OperacaoService operacaoService) {
+        this.operacaoService = operacaoService;
     }
 
-    // RF10 - Operação de Importação
-    @PostMapping("/importacao")
-    public ResponseEntity<Operacao> cadastrarImportacao(@RequestBody Operacao operacao) {
-        operacao.setTipo("IMPORTACAO");
-        operacao.setStatus("EM_ANDAMENTO");
-        return ResponseEntity.status(HttpStatus.CREATED).body(operacaoRepository.save(operacao));
+    // RF06 - Iniciar operação
+    @PostMapping
+    public ResponseEntity<Operacao> iniciarOperacao(
+            @RequestParam Long solicitacaoId,
+            @RequestParam(required = false) Long conteinerId,
+            @RequestParam String responsavel,
+            @RequestParam String observacoes) {
+        Operacao operacao = operacaoService.iniciarOperacao(solicitacaoId, conteinerId, responsavel, observacoes);
+        return new ResponseEntity<>(operacao, HttpStatus.CREATED);
     }
 
-    // RF11 - Operação de Exportação
-    @PostMapping("/exportacao")
-    public ResponseEntity<Operacao> cadastrarExportacao(@RequestBody Operacao operacao) {
-        operacao.setTipo("EXPORTACAO");
-        operacao.setStatus("EM_ANDAMENTO");
-        return ResponseEntity.status(HttpStatus.CREATED).body(operacaoRepository.save(operacao));
-    }
-
-    // RF15 - Alterar status de uma operação
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<Operacao> alterarStatus(@PathVariable Long id, @RequestParam String status) {
-        return operacaoRepository.findById(id).map(op -> {
-            op.setStatus(status);
-            return ResponseEntity.ok(operacaoRepository.save(op));
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
-    // RF17 / RF27 - Listar/Acompanhar operações
+    // RF09 - Acompanhamento da operação
     @GetMapping
-    public ResponseEntity<List<Operacao>> listarTodas() {
-        return ResponseEntity.ok(operacaoRepository.findAll());
+    public ResponseEntity<List<Operacao>> listarOperacoes() {
+        return new ResponseEntity<>(operacaoService.listar(), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/andamento")
+    public ResponseEntity<Operacao> atualizarAndamento(
+            @PathVariable Long id,
+            @RequestParam String andamento,
+            @RequestParam(required = false) String observacoes) {
+        Operacao operacao = operacaoService.atualizarAndamento(id, andamento, observacoes);
+        return new ResponseEntity<>(operacao, HttpStatus.OK);
     }
 }

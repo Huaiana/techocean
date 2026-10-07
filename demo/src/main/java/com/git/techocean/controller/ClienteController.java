@@ -1,7 +1,6 @@
 package com.git.techocean.controller;
 
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +23,13 @@ public class ClienteController {
 
     // RF01 - Cadastrar cliente
     @PostMapping
-    public Cliente cadastrar(
+    public ResponseEntity<Cliente> cadastrar(
             @RequestParam String nome,
             @RequestParam String cpfcnpj,
             @RequestParam String email,
             @RequestParam String senha) {
-        return clienteService.cadastrar(nome, cpfcnpj, email, senha);
+        Cliente cliente = clienteService.cadastrar(nome, cpfcnpj, email, senha);
+        return new ResponseEntity<>(cliente, HttpStatus.CREATED);
     }
 
     // RF02 - Login de cliente
@@ -38,19 +38,22 @@ public class ClienteController {
         Cliente clienteEncontrado = clienteRepository.findByEmail(cliente.getEmail());
         if (clienteEncontrado != null && clienteEncontrado.getSenha().equals(cliente.getSenha())) {
             return new ResponseEntity<>(clienteEncontrado, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-    // RF21 - Administradores podem visualizar clientes cadastrados
+    // RF21 - Listar todos os clientes
     @GetMapping
     public ResponseEntity<List<Cliente>> listarClientes() {
-        List<Cliente> clientes = clienteRepository.findAll();
-        return new ResponseEntity<>(clientes, HttpStatus.OK);
+        return new ResponseEntity<>(clienteService.listar(), HttpStatus.OK);
     }
 
-    // RF22 - Administradores podem editar ou atualizar dados de clientes cadastrados
+    @GetMapping("/{id}")
+    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(clienteService.buscarPorId(id), HttpStatus.OK);
+    }
+
+    // RF22 - Editar ou atualizar dados de cliente
     @PutMapping("/{id}")
     public ResponseEntity<Cliente> atualizarCliente(@PathVariable Long id, @RequestBody Cliente clienteAtualizado) {
         Cliente clienteExistente = clienteRepository.findById(id).orElse(null);
@@ -60,8 +63,7 @@ public class ClienteController {
             clienteExistente.setCPFCNPJ(clienteAtualizado.getCPFCNPJ());
             Cliente clienteSalvo = clienteRepository.save(clienteExistente);
             return new ResponseEntity<>(clienteSalvo, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-    }   
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }

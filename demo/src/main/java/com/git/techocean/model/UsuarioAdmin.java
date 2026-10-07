@@ -1,9 +1,6 @@
 package com.git.techocean.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,17 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Cliente {
+public class UsuarioAdmin {
 
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String nome;
-
-    @Column(nullable = false)
-    private String CPFCNPJ;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -30,10 +24,13 @@ public class Cliente {
     @Column(nullable = false)
     private String senha;
 
-    public Cliente(String nome, String CPFCNPJ, String email, String senha) {
+    @Column(nullable = false)
+    private String cargo;
+
+    public UsuarioAdmin(String nome, String email, String senha, String cargo) {
         this.nome = nome;
-        this.CPFCNPJ = CPFCNPJ;
         this.email = email;
         this.senha = senha;
+        this.cargo = cargo;
     }
 }

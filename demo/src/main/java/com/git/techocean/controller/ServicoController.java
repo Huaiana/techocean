@@ -1,66 +1,41 @@
 package com.git.techocean.controller;
 
-import com.git.techocean.model.Servico;
-import com.git.techocean.repository.ServicoRepository;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.git.techocean.model.Servico;
+import com.git.techocean.service.ServicoService;
 
 @RestController
 @RequestMapping("/servicos")
-public final class ServicoController {
+public class ServicoController {
 
-    private final ServicoRepository servicoRepository;
+    private final ServicoService servicoService;
 
-    public ServicoController(ServicoRepository servicoRepository) {
-        this.servicoRepository = servicoRepository;
+    public ServicoController(ServicoService servicoService) {
+        this.servicoService = servicoService;
     }
 
-    // RF05 / RF23 - Cadastrar/gerenciar serviço
+    // RF07 - Exibição do catálogo de serviços
+    @GetMapping
+    public ResponseEntity<List<Servico>> listarServicosDisponiveis() {
+        return new ResponseEntity<>(servicoService.listarDisponiveis(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Servico> buscarPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(servicoService.buscarPorId(id), HttpStatus.OK);
+    }
+
     @PostMapping
-    public ResponseEntity<Servico> cadastrarServico(@RequestBody Servico servico) {
-        Servico novoServico = servicoRepository.save(servico);
-        return new ResponseEntity<>(novoServico, HttpStatus.CREATED);
-    }
-
-    // RF06 - Consultar serviços disponíveis
-    @GetMapping("/listar")
-    public ResponseEntity<List<Servico>> listarServicos() {
-        List<Servico> servicos = servicoRepository.findAll();
-        return new ResponseEntity<>(servicos, HttpStatus.OK);
-    }
-
-    // RF23 - Atualizar serviço
-    @PutMapping("/{id}")
-    public ResponseEntity<Servico> atualizarServico(@PathVariable Long id, @RequestBody Servico servicoAtualizado) {
-        return servicoRepository.findById(id)
-                .map(s -> {
-                    s.setNome(servicoAtualizado.getNome());
-                    s.setDescricao(servicoAtualizado.getDescricao());
-                    s.setPreco(servicoAtualizado.getPreco());
-                    Servico servicoSalvo = servicoRepository.save(s);
-                    return new ResponseEntity<>(servicoSalvo, HttpStatus.OK);
-                })
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    // RF23 - Deletar serviço
-    @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletarServico(@PathVariable Long id) {
-        return servicoRepository.findById(id)
-                .map(s -> {
-                    servicoRepository.delete(s);
-                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-                })
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Servico> cadastrarServico(
+            @RequestParam String nome,
+            @RequestParam String descricao,
+            @RequestParam String categoria,
+            @RequestParam(required = false) Boolean disponivel) {
+        Servico servico = servicoService.cadastrar(nome, descricao, categoria, disponivel);
+        return new ResponseEntity<>(servico, HttpStatus.CREATED);
     }
 }

@@ -57,4 +57,8 @@ public class Agendamento {
     @JoinColumn(name = "usuario_id", nullable = false)
     @JsonIgnore
     private Usuario usuario;
+
+    public boolean isConfirmado() {
+        return status;
+    }
 }

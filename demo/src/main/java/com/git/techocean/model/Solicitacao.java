@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Mensagem {
+public class Solicitacao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,19 +19,21 @@ public class Mensagem {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
-    @Column(nullable = false)
-    private String especialista;
+    @ManyToOne
+    @JoinColumn(name = "carga_id", nullable = false)
+    private Carga carga;
 
-    @Column(nullable = false, length = 1000)
-    private String conteudo;
+    @ManyToOne
+    @JoinColumn(name = "servico_id", nullable = false)
+    private Servico servico;
 
     @Column(nullable = false)
     private String status;
 
-    public Mensagem(Cliente cliente, String especialista, String conteudo, String status) {
+    public Solicitacao(Cliente cliente, Carga carga, Servico servico, String status) {
         this.cliente = cliente;
-        this.especialista = especialista;
-        this.conteudo = conteudo;
+        this.carga = carga;
+        this.servico = servico;
         this.status = status;
     }
 }

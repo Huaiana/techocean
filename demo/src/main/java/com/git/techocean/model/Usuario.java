@@ -6,14 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;    
+import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 public class Usuario {
-    
+
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
@@ -21,7 +21,7 @@ public class Usuario {
     @Column(nullable = false)
     private String nome;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private String CPFCNPJ;
 
     @Column(nullable = false, unique = true)
@@ -30,5 +30,7 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
-    
+    public String getCPF() {
+        return CPFCNPJ;
+    }
 }

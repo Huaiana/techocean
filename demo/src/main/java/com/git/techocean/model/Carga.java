@@ -1,24 +1,18 @@
 package com.git.techocean.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;    
+import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-
 public class Carga {
-    
+
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -27,19 +21,24 @@ public class Carga {
     @Column(nullable = false)
     private Double peso;
 
-    // Relacionamento com Cliente (RF12)[span_2](start_span)[span_2](end_span)
-    @ManyToOne 
-    @JoinColumn (name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    @Column(nullable = false)
+    private Double volume;
 
-    // Relacionamento com Operacao (RF13)[span_3](start_span)[span_3](end_span)
-    @ManyToOne
-    @JoinColumn (name = "operacao_id", nullable = false)
-    private Operacao operacao;
+    @Column(nullable = false)
+    private String tipoCarga;
 
-    // Associar opcionalmente ao Conteiner (RF14)[span_4](start_span)[span_4](end_span)
-    @ManyToOne
-    @JoinColumn (name = "conteiner_id")
-    private Conteiner conteiner;
+    @Column(nullable = false)
+    private String origem;
 
+    @Column(nullable = false)
+    private String destino;
+
+    public Carga(String descricao, Double peso, Double volume, String tipoCarga, String origem, String destino) {
+        this.descricao = descricao;
+        this.peso = peso;
+        this.volume = volume;
+        this.tipoCarga = tipoCarga;
+        this.origem = origem;
+        this.destino = destino;
+    }
 }

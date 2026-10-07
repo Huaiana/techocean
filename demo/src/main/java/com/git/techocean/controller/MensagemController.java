@@ -1,46 +1,35 @@
 package com.git.techocean.controller;
 
-import com.git.techocean.model.Mensagem;
-import com.git.techocean.repository.MensagemRepository;
+import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.git.techocean.model.Mensagem;
+import com.git.techocean.service.MensagemService;
 
 @RestController
 @RequestMapping("/mensagens")
 public class MensagemController {
 
-    private final MensagemRepository mensagemRepository;
+    private final MensagemService mensagemService;
 
-    public MensagemController(MensagemRepository mensagemRepository) {
-        this.mensagemRepository = mensagemRepository;
+    public MensagemController(MensagemService mensagemService) {
+        this.mensagemService = mensagemService;
     }
 
-    //RF18 - Cliente envia mensagem
+    // RF08 - Enviar mensagem ao atendimento
     @PostMapping
-    public ResponseEntity<Mensagem> enviarMensagem(@RequestBody Mensagem mensagem) {
-        Mensagem mensagemSalva = mensagemRepository.save(mensagem);
-        return ResponseEntity.ok(mensagemSalva);
+    public ResponseEntity<Mensagem> enviarMensagem(
+            @RequestParam Long clienteId,
+            @RequestParam(required = false) String especialista,
+            @RequestParam String conteudo) {
+        Mensagem mensagem = mensagemService.enviarMensagem(clienteId, especialista, conteudo);
+        return new ResponseEntity<>(mensagem, HttpStatus.CREATED);
     }
 
-    //RF19 - Funcionários visualizam mensagens
-    @GetMapping
-    public ResponseEntity<List<Mensagem>> listarMensagens() {
-        List<Mensagem> mensagens = mensagemRepository.findAll();
-        return ResponseEntity.ok(mensagens);
-    }
-
-    //RF20 - Funcionários responde as mensagens
-    @PutMapping("/{id}")
-    public ResponseEntity<Mensagem> responderMensagem(@PathVariable Long id, @RequestBody Mensagem resposta) {
-        return mensagemRepository.findById(id)
-                .map(mensagem -> {
-                    mensagem.setResposta(resposta.getResposta());
-                    Mensagem mensagemAtualizada = mensagemRepository.save(mensagem);
-                    return ResponseEntity.ok(mensagemAtualizada);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<Mensagem>> listarPorCliente(@PathVariable Long clienteId) {
+        return new ResponseEntity<>(mensagemService.listarPorCliente(clienteId), HttpStatus.OK);
     }
 }

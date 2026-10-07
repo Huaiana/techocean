@@ -1,20 +1,16 @@
 package com.git.techocean.controller;
 
-import com.git.techocean.model.Agendamento;
-import com.git.techocean.service.AgendamentoException;
-import com.git.techocean.service.AgendamentoService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import com.git.techocean.model.Agendamento;
+import com.git.techocean.service.AgendamentoService;
+import com.git.techocean.service.AgendamentoException;
 
 @RestController
 @RequestMapping("/agendamentos")
-@CrossOrigin(originPatterns = {"http://localhost:*", "http://127.0.0.1:*"})
 public class AgendamentoController {
 
     private final AgendamentoService agendamentoService;
@@ -27,6 +23,29 @@ public class AgendamentoController {
     public ResponseEntity<Agendamento> solicitarVisita(@RequestBody Agendamento request) {
         Agendamento agendamento = agendamentoService.solicitarVisita(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(agendamento);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Agendamento>> listarTodos() {
+        return new ResponseEntity<>(agendamentoService.listar(), HttpStatus.OK);
+    }
+
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<Agendamento>> listarPorCliente(@PathVariable Long clienteId) {
+        return new ResponseEntity<>(agendamentoService.listarPorCliente(clienteId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Agendamento> buscarPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(agendamentoService.buscarPorId(id), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Agendamento> atualizarStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        Agendamento agendamento = agendamentoService.atualizarStatus(id, status);
+        return new ResponseEntity<>(agendamento, HttpStatus.OK);
     }
 
     @ExceptionHandler(AgendamentoException.class)
