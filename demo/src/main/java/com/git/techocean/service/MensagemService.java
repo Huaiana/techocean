@@ -35,4 +35,17 @@ public class MensagemService {
     public List<Mensagem> listarPorCliente(Long clienteId) {
         return mensagemRepository.findByClienteId(clienteId);
     }
+
+    public Mensagem responder(Long id, String resposta) {
+        Mensagem mensagem = mensagemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mensagem não encontrada."));
+
+        if (resposta == null || resposta.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A resposta é obrigatória.");
+        }
+
+        mensagem.setResposta(resposta);
+        mensagem.setStatus("RESPONDIDO");
+        return mensagemRepository.save(mensagem);
+    }
 }

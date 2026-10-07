@@ -32,4 +32,12 @@ public class MensagemController {
     public ResponseEntity<List<Mensagem>> listarPorCliente(@PathVariable Long clienteId) {
         return new ResponseEntity<>(mensagemService.listarPorCliente(clienteId), HttpStatus.OK);
     }
+
+    @PutMapping("/{id}/resposta")
+    public ResponseEntity<Mensagem> responder(
+            @PathVariable Long id,
+            @RequestBody Mensagem resposta) {
+        Mensagem mensagem = mensagemService.responder(id, resposta.getResposta());
+        return new ResponseEntity<>(mensagem, HttpStatus.OK);
+    }
 }

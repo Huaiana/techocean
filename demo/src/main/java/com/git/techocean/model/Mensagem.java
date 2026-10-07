@@ -25,6 +25,9 @@ public class Mensagem {
     @Column(nullable = false, length = 1000)
     private String conteudo;
 
+    @Column(length = 1000)
+    private String resposta;
+
     @Column(nullable = false)
     private String status;
 
