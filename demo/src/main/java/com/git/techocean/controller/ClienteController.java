@@ -1,34 +1,35 @@
 package com.git.techocean.controller;
 
-import com.git.techocean.model.Cliente;
-import com.git.techocean.repository.ClienteRepository;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.git.techocean.model.Cliente;
+import com.git.techocean.repository.ClienteRepository;
+import com.git.techocean.service.ClienteService;
 
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
 
+    private final ClienteService clienteService;
     private final ClienteRepository clienteRepository;
 
-    public ClienteController(ClienteRepository clienteRepository) {
+    public ClienteController(ClienteService clienteService, ClienteRepository clienteRepository) {
+        this.clienteService = clienteService;
         this.clienteRepository = clienteRepository;
     }
 
     // RF01 - Cadastrar cliente
     @PostMapping
-    public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente cliente) {
-        Cliente novoCliente = clienteRepository.save(cliente);
-        return new ResponseEntity<>(novoCliente, HttpStatus.CREATED);
+    public Cliente cadastrar(
+            @RequestParam String nome,
+            @RequestParam String cpfcnpj,
+            @RequestParam String email,
+            @RequestParam String senha) {
+        return clienteService.cadastrar(nome, cpfcnpj, email, senha);
     }
 
     // RF02 - Login de cliente
@@ -49,14 +50,14 @@ public class ClienteController {
         return new ResponseEntity<>(clientes, HttpStatus.OK);
     }
 
-    // RF22 - Administradores podem editar dados de clientes cadastrados
+    // RF22 - Administradores podem editar ou atualizar dados de clientes cadastrados
     @PutMapping("/{id}")
     public ResponseEntity<Cliente> atualizarCliente(@PathVariable Long id, @RequestBody Cliente clienteAtualizado) {
         Cliente clienteExistente = clienteRepository.findById(id).orElse(null);
         if (clienteExistente != null) {
             clienteExistente.setNome(clienteAtualizado.getNome());
             clienteExistente.setEmail(clienteAtualizado.getEmail());
-            clienteExistente.setCPF(clienteAtualizado.getCPF());
+            clienteExistente.setCPFCNPJ(clienteAtualizado.getCPFCNPJ());
             Cliente clienteSalvo = clienteRepository.save(clienteExistente);
             return new ResponseEntity<>(clienteSalvo, HttpStatus.OK);
         } else {

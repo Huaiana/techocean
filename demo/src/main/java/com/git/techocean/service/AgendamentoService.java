@@ -63,7 +63,7 @@ public class AgendamentoService {
 
             usuario = new Usuario();
             usuario.setNome(request.getNome().trim());
-            usuario.setCPF(request.getCpf().trim());
+            usuario.setCPFCNPJ(request.getCpf().trim());
             usuario.setEmail(email);
             usuario.setSenha(request.getSenha());
             usuario = usuarioRepository.save(usuario);
@@ -81,7 +81,7 @@ public class AgendamentoService {
 
         request.setEmail(email);
         request.setTelefone(request.getTelefone().trim());
-        request.setConfirmado(true);
+        request.setStatus(true);
         request.setUsuario(usuario);
         return agendamentoRepository.save(request);
     }

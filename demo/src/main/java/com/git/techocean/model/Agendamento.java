@@ -31,7 +31,7 @@ public class Agendamento {
     private String telefone;
 
     @Column(nullable = false)
-    private boolean confirmado;
+    private boolean status; // true = confirmado, false = pendente
 
     @Transient
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;    
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -22,12 +22,12 @@ public class Cliente {
     private String nome;
 
     @Column (nullable = false)
-    private String CPF;
+    private String CPFCNPJ;
 
     @Column (nullable = false, unique = true)
     private String email;
 
     @Column (nullable = false)
     private String senha;
-    
+
 }
