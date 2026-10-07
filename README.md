@@ -7,7 +7,7 @@ Sistema para apresentar serviços de segurança e amarração de cargas e dispon
 O repositório contém duas aplicações:
 
 - **Site institucional** (`front-buddy-dev/`): página inicial com apresentação dos serviços, informações da empresa e contato.
-- **API** (`demo/`): aplicação Spring Boot para cadastro de clientes e usuários, gerenciamento de serviços, orçamentos e agendamentos de visitas.
+- **API** (`demo/`): aplicação Spring Boot para clientes e administradores, cargas, serviços, contêineres, solicitações, orçamentos, operações, mensagens e agendamentos de visitas.
 
 O site e a API são executados separadamente. A página institucional atual não depende da API para renderizar seu conteúdo.
 
@@ -71,26 +71,44 @@ npm run preview
 
 ## API REST
 
-Os endpoints abaixo são definidos pelos controladores do backend:
+Os endpoints abaixo correspondem aos controladores atuais do backend. Salvo indicação em contrário, os valores de criação e atualização são recebidos como parâmetros de requisição (`@RequestParam`).
 
 | Método | Endpoint | Finalidade |
 | --- | --- | --- |
-| `POST` | `/clientes` | Cadastrar cliente |
-| `POST` | `/clientes/login` | Autenticar cliente |
+| `POST` | `/clientes?nome=...&cpfcnpj=...&email=...&senha=...` | Cadastrar cliente |
+| `POST` | `/clientes/login` | Autenticar cliente (corpo JSON com `email` e `senha`) |
 | `GET` | `/clientes` | Listar clientes |
-| `PUT` | `/clientes/{id}` | Atualizar dados do cliente |
-| `POST` | `/usuarios` | Cadastrar usuário |
-| `POST` | `/usuarios/login` | Autenticar funcionário |
-| `POST` | `/servicos` | Cadastrar serviço |
-| `GET` | `/servicos/listar` | Listar serviços |
-| `PUT` | `/servicos/{id}` | Atualizar serviço |
-| `DELETE` | `/servicos/deletar/{id}` | Excluir serviço |
-| `POST` | `/orcamentos/solicitar` | Solicitar orçamento; inicia com status `pendente` |
-| `GET` | `/orcamentos/consultar/{clienteId}` | Consultar orçamentos de um cliente |
-| `PUT` | `/orcamentos/{id}/status?status={status}` | Alterar o status de um orçamento |
-| `POST` | `/agendamentos` | Solicitar uma visita técnica; cria o cadastro em `Usuario` quando os dados de registro são enviados |
+| `GET` | `/clientes/{id}` | Buscar cliente por ID |
+| `PUT` | `/clientes/{id}` | Atualizar nome, e-mail e CPF/CNPJ (corpo JSON) |
+| `POST` | `/admin/cadastrar?nome=...&email=...&senha=...&cargo=...` | Cadastrar administrador |
+| `POST` | `/admin/login` | Autenticar administrador (corpo JSON com `email` e `senha`) |
+| `POST` | `/cargas?descricao=...&peso=...&volume=...&tipoCarga=...&origem=...&destino=...` | Cadastrar carga |
+| `GET` | `/cargas` | Listar cargas |
+| `GET` | `/cargas/{id}` | Buscar carga por ID |
+| `POST` | `/servicos?nome=...&descricao=...&categoria=...&disponivel=...` | Cadastrar serviço |
+| `GET` | `/servicos` | Listar serviços disponíveis |
+| `GET` | `/servicos/{id}` | Buscar serviço por ID |
+| `POST` | `/conteineres?numeroConteiner=...&tipo=...&situacao=...` | Cadastrar contêiner |
+| `GET` | `/conteineres` | Listar contêineres |
+| `GET` | `/conteineres/{id}` | Buscar contêiner por ID |
+| `POST` | `/solicitacoes?clienteId=...&cargaId=...&servicoId=...` | Criar solicitação |
+| `GET` | `/solicitacoes` | Listar solicitações |
+| `GET` | `/solicitacoes/cliente/{clienteId}` | Listar solicitações de um cliente |
+| `GET` | `/solicitacoes/{id}` | Buscar solicitação por ID |
+| `PUT` | `/solicitacoes/{id}/status?status=...` | Atualizar status de solicitação |
+| `POST` | `/orcamentos?clienteId=...&cargaId=...&servicoId=...` | Criar orçamento com status `PENDENTE` |
+| `GET` | `/orcamentos` | Listar orçamentos |
+| `GET` | `/orcamentos/cliente/{clienteId}` | Listar orçamentos de um cliente |
+| `PUT` | `/orcamentos/{id}/analise?status=...&valorEstimado=...&observacoes=...` | Atualizar análise do orçamento |
+| `POST` | `/operacoes?solicitacaoId=...&conteinerId=...&responsavel=...&observacoes=...` | Iniciar operação |
+| `GET` | `/operacoes` | Listar operações |
+| `PUT` | `/operacoes/{id}/andamento?andamento=...&observacoes=...` | Atualizar andamento da operação |
+| `POST` | `/mensagens?clienteId=...&especialista=...&conteudo=...` | Enviar mensagem ao atendimento |
+| `GET` | `/mensagens/cliente/{clienteId}` | Listar mensagens de um cliente |
+| `PUT` | `/mensagens/{id}/resposta` | Responder mensagem (corpo JSON com `resposta`) |
+| `POST` | `/agendamentos` | Solicitar visita técnica (corpo JSON) |
 
-As operações que recebem dados esperam um corpo JSON. Para agendar uma visita, envie `nome`, `telefone`, `email`, `dataHora` (ISO local, por exemplo `2026-10-20T14:30`) e `confirmacao: true`. Se o e-mail já estiver cadastrado em `Usuario`, envie também `senha`. Se não houver cadastro, a API informa que o cadastro é necessário; o site encaminha o visitante para criar o usuário com CPF e senha e conclui o agendamento em seguida. A atualização de status do orçamento recebe o novo status no parâmetro `status`.
+O formulário de visita do site envia a solicitação para `POST /agendamentos` usando a variável `VITE_API_URL`; por padrão, usa `http://localhost:8080`. Envie `nome`, `telefone`, `email`, `dataHora` (data e hora ISO local, por exemplo `2026-10-20T14:30`) e `confirmacao: true`. Para um cliente já cadastrado, inclua `senha`; para um novo cadastro, inclua também `cpf` e uma senha com pelo menos oito caracteres. O restante dos endpoints não está automaticamente integrado ao site.
 
 ## Testes e verificações
 
