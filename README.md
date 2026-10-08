@@ -6,7 +6,7 @@ Sistema para apresentar serviços de segurança e amarração de cargas e dispon
 
 O repositório contém duas aplicações:
 
-- **Site institucional** (`techocean-web/`): página inicial com apresentação dos serviços, informações da empresa e contato.
+- **Site institucional** (raiz do repositório): página inicial com apresentação dos serviços, informações da empresa e contato.
 - **API** (`demo/`): aplicação Spring Boot para clientes e administradores, cargas, serviços, contêineres, solicitações, orçamentos, operações, mensagens e agendamentos de visitas.
 
 O site e a API são executados separadamente. A página institucional atual não depende da API para renderizar seu conteúdo.
@@ -22,7 +22,7 @@ O site e a API são executados separadamente. A página institucional atual não
 ```text
 .
 ├── demo/                 # API Java/Spring Boot e testes
-└── techocean-web/        # Site institucional React
+└── src/                  # Site institucional React
 ```
 
 ## Pré-requisitos
@@ -50,19 +50,25 @@ cd demo
 ./mvnw spring-boot:run
 ```
 
-A API Spring Boot fica disponível, por padrão, em `http://localhost:8080`. Se essa porta já estiver ocupada no seu ambiente, a aplicação também pode rodar em `http://localhost:8081`; nesse caso, ajuste `VITE_API_URL` no site para apontar para a porta correta. Essa porta serve os endpoints da API, não o site; abrir `http://localhost:8080/` pode retornar `404`. Para verificar a API, acesse `http://localhost:8080/clientes` (ou `http://localhost:8081/clientes` se a porta foi remapeada).
+A API Spring Boot fica disponível, por padrão, em `http://localhost:8080`. O Vite usa a porta `5173` por padrão, mas a porta pode ser definida pelo comando que o inicia. Se o Vite já estiver usando `8080`, inicie a API em `8081`:
+
+```powershell
+cd demo
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--server.port=8081"
+```
+
+Nesse caso, `VITE_API_URL` deve apontar para `http://localhost:8081` (como configurado neste checkout). Para confirmar que está acessando a API — e não o servidor do site — teste `http://localhost:8081/clientes`; a resposta esperada é `200`. A raiz `/` não é uma rota da API e pode retornar `404`.
 
 ### Site
 
 Em outro terminal:
 
 ```bash
-cd techocean-web
 npm install
 npm run dev
 ```
 
-Use o endereço local informado pelo Vite no terminal para abrir o site. Como a porta `8080` é usada pela API, o Vite escolhe outra porta disponível (por exemplo, `8081`) quando ambos estão em execução. Para gerar e visualizar a versão de produção:
+Use o endereço local informado pelo Vite no terminal para abrir o site. Se usar a porta `8080` para o Vite, mantenha a API em `8081` e `VITE_API_URL=http://localhost:8081`. O Vite pode carregar as variáveis de ambiente ao iniciar; reinicie-o após alterar `.env`. Para gerar e visualizar a versão de produção:
 
 ```bash
 npm run build
@@ -74,12 +80,12 @@ npm run preview
 O arquivo `render.yaml` prepara a API Spring Boot e um banco PostgreSQL de teste no Render:
 
 1. No Render, crie um Blueprint a partir do repositório `Huaiana/techocean` e confirme a criação dos recursos definidos em `render.yaml`.
-2. Aguarde o serviço `techocean-api` ficar disponível em `http://localhost:8080`. Se o Render atribuir outro endereço, atualize `VITE_API_URL` em `techocean-web/.env` para a URL efetivamente mostrada no painel.
+2. Aguarde o serviço `techocean-api` ficar disponível e use a URL pública exibida no painel do Render como `VITE_API_URL` no ambiente de build do site.
 3. Depois de conectar o projeto Lovable ao GitHub na branch `main`, sincronize as alterações e publique novamente o projeto para que ele use essa URL.
 
 O deploy usa os planos gratuitos do Render para teste. Serviços gratuitos podem suspender após inatividade e o banco gratuito é temporário; não use essa configuração para dados importantes ou de produção. O banco criado no Render começa vazio: dados gravados apenas no H2 local não são copiados.
 
-Para desenvolvimento local depois da publicação, crie `techocean-web/.env.local` com `VITE_API_URL=http://localhost:8080`; esse arquivo local não deve ser enviado ao Git.
+Para desenvolvimento local depois da publicação, configure `VITE_API_URL` em `.env.local` na raiz do repositório com a URL local da API (`http://localhost:8080` ou `http://localhost:8081`, conforme a porta usada). Esse arquivo local não deve ser enviado ao Git.
 
 ## API REST
 
@@ -134,13 +140,11 @@ cd demo
 Executar os testes do site:
 
 ```bash
-cd techocean-web
 npm test
 ```
 
 Verificar o estilo do site:
 
 ```bash
-cd techocean-web
 npm run lint
 ```
