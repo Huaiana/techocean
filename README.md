@@ -77,13 +77,13 @@ npm run preview
 
 ### Publicar a API no Render
 
-O arquivo `render.yaml` prepara a API Spring Boot e um banco PostgreSQL de teste no Render:
+O arquivo `render.yaml` prepara o site, a API Spring Boot e um banco PostgreSQL de teste no Render:
 
-1. No Render, crie um Blueprint a partir do repositório `Huaiana/techocean` e confirme a criação dos recursos definidos em `render.yaml`.
-2. Aguarde o serviço `techocean-api` ficar disponível. O arquivo `.env.production` configura o build de produção do site para usar `https://techocean-api.onrender.com`; se o Render mostrar outro domínio para o serviço, atualize esse arquivo antes de publicar o site.
-3. Depois de conectar o projeto Lovable ao GitHub na branch `main`, sincronize as alterações e publique novamente o projeto para que ele use essa URL.
+1. No Render, crie ou sincronize o Blueprint do repositório `Huaiana/techocean` e confirme os novos recursos de `render.yaml`.
+2. Aguarde `techocean-api` e `techocean-site` ficarem disponíveis. O site será publicado em `https://techocean-site.onrender.com` e usa `https://techocean-api.onrender.com` para as chamadas da API.
+3. O site também pode ser publicado no Lovable: mantenha o projeto conectado à branch `main` do GitHub, sincronize os commits e use **Publish** no projeto. O destino Cloudflare do Lovable é mantido pelo ambiente de build do Lovable; o Render usa o preset Node `render_com`.
 
-O deploy usa os planos gratuitos do Render para teste. Serviços gratuitos podem suspender após inatividade e o banco gratuito é temporário; não use essa configuração para dados importantes ou de produção. O banco criado no Render começa vazio: dados gravados apenas no H2 local não são copiados.
+Os serviços Render usam planos gratuitos para teste. Podem suspender após inatividade e o banco gratuito é temporário; não use essa configuração para dados importantes ou de produção. O banco criado no Render começa vazio: dados gravados apenas no H2 local não são copiados.
 
 Para desenvolvimento local depois da publicação, mantenha `VITE_API_URL` em `.env` apontando para a URL local da API (`http://localhost:8080` ou `http://localhost:8081`, conforme a porta usada). Builds de produção usam `.env.production`; valores de `VITE_API_URL` configurados diretamente no ambiente do provedor têm precedência sobre os arquivos `.env`.
 
