@@ -124,9 +124,12 @@ Os endpoints abaixo correspondem aos controladores atuais do backend. Salvo indi
 | `POST` | `/mensagens?clienteId=...&especialista=...&conteudo=...` | Enviar mensagem ao atendimento |
 | `GET` | `/mensagens/cliente/{clienteId}` | Listar mensagens de um cliente |
 | `PUT` | `/mensagens/{id}/resposta` | Responder mensagem (corpo JSON com `resposta`) |
+| `POST` | `/mensagens/contatos` | Registrar contato do site (corpo JSON com `nome`, `email` e `conteudo`) |
+| `GET` | `/mensagens/contatos` | Listar mensagens recebidas pelo formulário público |
+| `PUT` | `/mensagens/contatos/{id}/resposta` | Responder contato do site (corpo JSON com `resposta`) |
 | `POST` | `/agendamentos` | Solicitar visita técnica (corpo JSON) |
 
-O formulário de visita do site envia a solicitação para `POST /agendamentos` usando a variável `VITE_API_URL`; por padrão, usa `http://localhost:8080`. Envie `nome`, `telefone`, `email`, `dataHora` (data e hora ISO local, por exemplo `2026-10-20T14:30`) e `confirmacao: true`. Para um cliente já cadastrado, inclua `senha`; para um novo cadastro, inclua também `cpf` e uma senha com pelo menos oito caracteres. O restante dos endpoints não está automaticamente integrado ao site.
+O formulário “Fale conosco” grava contatos sem exigir cadastro. As mensagens aparecem na seção Mensagens do painel, onde a equipe pode respondê-las. O formulário de visita do site envia a solicitação para `POST /agendamentos` usando a variável `VITE_API_URL`; por padrão, usa `http://localhost:8080`. Envie `nome`, `telefone`, `email`, `dataHora` (data e hora ISO local, por exemplo `2026-10-20T14:30`) e `confirmacao: true`. Para um cliente já cadastrado, inclua `senha`; para um novo cadastro, inclua também `cpf` e uma senha com pelo menos oito caracteres.
 
 ## Testes e verificações
 

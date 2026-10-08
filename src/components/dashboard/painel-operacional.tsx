@@ -4,7 +4,7 @@ import type { Carga } from "@/models/carga";
 import type { Cliente } from "@/models/cliente";
 import type { Agendamento } from "@/models/agendamento";
 import type { Conteiner } from "@/models/conteiner";
-import type { Mensagem } from "@/models/mensagem";
+import type { ContatoMensagem, Mensagem } from "@/models/mensagem";
 import type { Operacao } from "@/models/operacao";
 import type { Orcamento } from "@/models/orcamento";
 import type { Servico } from "@/models/servico";
@@ -14,7 +14,12 @@ import { listarClientes } from "@/services/clientes";
 import { listarCargas } from "@/services/cargas";
 import { atualizarAgendamento, listarAgendamentos } from "@/services/agendamentos";
 import { cadastrarConteiner, listarConteineres } from "@/services/conteineres";
-import { listarMensagensCliente, responderMensagem } from "@/services/mensagens";
+import {
+  listarMensagensCliente,
+  listarMensagensContato,
+  responderMensagem,
+  responderMensagemContato,
+} from "@/services/mensagens";
 import { atualizarOperacao, cadastrarOperacao, listarOperacoes } from "@/services/operacoes";
 import { atualizarOrcamento, cadastrarOrcamento, listarOrcamentos } from "@/services/orcamentos";
 import { cadastrarServico, listarServicos } from "@/services/servicos";
@@ -856,21 +861,36 @@ export function Operacoes() {
   );
 }
 
+type Conversa =
+  { tipo: "cliente"; mensagem: Mensagem } | { tipo: "contato"; mensagem: ContatoMensagem };
+
 export function Mensagens() {
-  const [itens, setItens] = useState<Mensagem[]>([]);
+  const [itens, setItens] = useState<Conversa[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
-  const [salvandoId, setSalvandoId] = useState<number | null>(null);
+  const [salvandoId, setSalvandoId] = useState<string | null>(null);
 
   useEffect(() => {
     let ativo = true;
-    listarClientes()
-      .then((clientes) =>
-        Promise.all(clientes.map((cliente) => listarMensagensCliente(cliente.id))),
+    Promise.all([listarClientes(), listarMensagensContato()])
+      .then(([clientes, contatos]) =>
+        Promise.all(clientes.map((cliente) => listarMensagensCliente(cliente.id))).then(
+          (listas) => ({
+            contatos,
+            mensagens: listas.flat(),
+          }),
+        ),
       )
-      .then((listas) => {
-        if (ativo) setItens(listas.flat().sort((a, b) => a.id - b.id));
+      .then(({ contatos, mensagens }) => {
+        if (ativo) {
+          setItens([
+            ...contatos.map((mensagem) => ({ tipo: "contato" as const, mensagem })),
+            ...mensagens
+              .sort((a, b) => a.id - b.id)
+              .map((mensagem) => ({ tipo: "cliente" as const, mensagem })),
+          ]);
+        }
       })
       .catch((error: unknown) => {
         if (ativo) setErro(error instanceof Error ? error.message : "Falha ao carregar mensagens.");
@@ -883,16 +903,31 @@ export function Mensagens() {
     };
   }, []);
 
-  async function responder(evento: FormEvent<HTMLFormElement>, item: Mensagem) {
+  async function responder(evento: FormEvent<HTMLFormElement>, conversa: Conversa) {
     evento.preventDefault();
     setErro("");
     setSucesso("");
-    setSalvandoId(item.id);
+    const item = conversa.mensagem;
+    const chave = `${conversa.tipo}-${item.id}`;
+    setSalvandoId(chave);
     const form = evento.currentTarget;
     const resposta = String(new FormData(form).get("resposta")).trim();
     try {
-      const atualizada = await responderMensagem(item.id, resposta);
-      setItens((atuais) => atuais.map((x) => (x.id === item.id ? atualizada : x)));
+      if (conversa.tipo === "contato") {
+        const atualizada = await responderMensagemContato(item.id, resposta);
+        setItens((atuais) =>
+          atuais.map((x) =>
+            x.tipo === "contato" && x.mensagem.id === item.id ? { ...x, mensagem: atualizada } : x,
+          ),
+        );
+      } else {
+        const atualizada = await responderMensagem(item.id, resposta);
+        setItens((atuais) =>
+          atuais.map((x) =>
+            x.tipo === "cliente" && x.mensagem.id === item.id ? { ...x, mensagem: atualizada } : x,
+          ),
+        );
+      }
       setSucesso(`Mensagem ${item.id} respondida.`);
       form.reset();
     } catch (error) {
@@ -908,7 +943,7 @@ export function Mensagens() {
         <div>
           <h2 className="text-lg font-semibold">Mensagens recebidas</h2>
           <p className="text-sm text-muted-foreground">
-            Acompanhe as conversas e responda aos clientes.
+            Acompanhe contatos do site e conversas com clientes.
           </p>
         </div>
         {!carregando && !erro && itens.length > 0 && (
@@ -923,105 +958,119 @@ export function Mensagens() {
         <TabelaVazia carregando={false} vazio="Nenhuma mensagem recebida." />
       ) : (
         <div className="grid gap-5">
-          {itens.map((x) => (
-            <article
-              key={x.id}
-              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
-            >
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-secondary/40 px-5 py-4">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
-                    <MessageSquareText className="size-5" aria-hidden="true" />
-                  </span>
-                  <div>
-                    <h3 className="font-semibold">Conversa #{x.id}</h3>
-                    <p className="text-xs text-muted-foreground">Atendimento ao cliente</p>
-                  </div>
-                </div>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
-                    x.resposta
-                      ? "border-primary/30 bg-primary/10 text-primary"
-                      : "border-amber-500/30 bg-amber-500/10 text-amber-200"
-                  }`}
-                >
-                  {x.resposta ? (
-                    <CheckCheck className="size-3.5" aria-hidden="true" />
-                  ) : (
-                    <MessageSquareText className="size-3.5" aria-hidden="true" />
-                  )}
-                  {x.status}
-                </span>
-              </header>
-              <div className="grid gap-5 p-5">
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {itens.map((conversa) => {
+            const x = conversa.mensagem;
+            const chave = `${conversa.tipo}-${x.id}`;
+            const nome = conversa.tipo === "contato" ? x.nome : x.cliente?.nome;
+            const email = conversa.tipo === "contato" ? x.email : x.cliente?.email;
+            return (
+              <article
+                key={chave}
+                className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+              >
+                <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-secondary/40 px-5 py-4">
                   <div className="flex items-center gap-3">
-                    <span className="grid size-9 place-items-center rounded-full bg-muted text-muted-foreground">
-                      <UserRound className="size-4" aria-hidden="true" />
+                    <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
+                      <MessageSquareText className="size-5" aria-hidden="true" />
                     </span>
                     <div>
-                      <p className="text-xs text-muted-foreground">Cliente</p>
-                      <p className="text-sm font-medium">{x.cliente?.nome || "Não informado"}</p>
+                      <h3 className="font-semibold">
+                        {conversa.tipo === "contato" ? "Contato" : "Conversa"} #{x.id}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {conversa.tipo === "contato"
+                          ? "Contato pelo site"
+                          : "Atendimento ao cliente"}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="size-4 shrink-0" aria-hidden="true" />
-                    <span className="break-all">{x.cliente?.email || "E-mail não informado"}</span>
-                  </div>
-                  {x.especialista && (
-                    <p className="text-xs text-muted-foreground">
-                      Atendimento:{" "}
-                      <span className="font-medium text-foreground">{x.especialista}</span>
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid gap-3">
-                  <div className="max-w-3xl rounded-2xl rounded-tl-sm border border-border bg-secondary/50 p-4">
-                    <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                      x.resposta
+                        ? "border-primary/30 bg-primary/10 text-primary"
+                        : "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                    }`}
+                  >
+                    {x.resposta ? (
+                      <CheckCheck className="size-3.5" aria-hidden="true" />
+                    ) : (
                       <MessageSquareText className="size-3.5" aria-hidden="true" />
-                      Mensagem do cliente
-                    </p>
-                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                      {x.conteudo}
-                    </p>
+                    )}
+                    {x.status}
+                  </span>
+                </header>
+                <div className="grid gap-5 p-5">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-9 place-items-center rounded-full bg-muted text-muted-foreground">
+                        <UserRound className="size-4" aria-hidden="true" />
+                      </span>
+                      <div>
+                        <p className="text-xs text-muted-foreground">
+                          {conversa.tipo === "contato" ? "Contato" : "Cliente"}
+                        </p>
+                        <p className="text-sm font-medium">{nome || "Não informado"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="size-4 shrink-0" aria-hidden="true" />
+                      <span className="break-all">{email || "E-mail não informado"}</span>
+                    </div>
+                    {conversa.tipo === "cliente" && x.especialista && (
+                      <p className="text-xs text-muted-foreground">
+                        Atendimento:{" "}
+                        <span className="font-medium text-foreground">{x.especialista}</span>
+                      </p>
+                    )}
                   </div>
-                  {x.resposta && (
-                    <div className="ml-auto w-full max-w-3xl rounded-2xl rounded-tr-sm border border-primary/25 bg-primary/10 p-4">
-                      <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-                        <CheckCheck className="size-3.5" aria-hidden="true" />
-                        Resposta da equipe
+
+                  <div className="grid gap-3">
+                    <div className="max-w-3xl rounded-2xl rounded-tl-sm border border-border bg-secondary/50 p-4">
+                      <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <MessageSquareText className="size-3.5" aria-hidden="true" />
+                        Mensagem do cliente
                       </p>
                       <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
-                        {x.resposta}
+                        {x.conteudo}
                       </p>
                     </div>
-                  )}
-                </div>
+                    {x.resposta && (
+                      <div className="ml-auto w-full max-w-3xl rounded-2xl rounded-tr-sm border border-primary/25 bg-primary/10 p-4">
+                        <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                          <CheckCheck className="size-3.5" aria-hidden="true" />
+                          Resposta da equipe
+                        </p>
+                        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                          {x.resposta}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
-                <form
-                  onSubmit={(e) => void responder(e, x)}
-                  className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end"
-                >
-                  <label className="grid flex-1 gap-2 text-xs font-medium text-muted-foreground">
-                    Sua resposta
-                    <textarea
-                      name="resposta"
-                      required
-                      maxLength={1000}
-                      rows={2}
-                      placeholder="Escreva uma resposta para o cliente..."
-                      className={`${campo} min-h-20 resize-y`}
-                    />
-                  </label>
-                  <button disabled={salvandoId === x.id} className={`${botao} sm:mb-0.5`}>
-                    <Send className="size-4" aria-hidden="true" />
-                    {salvandoId === x.id ? "Enviando..." : "Enviar resposta"}
-                  </button>
-                </form>
-              </div>
-            </article>
-          ))}
+                  <form
+                    onSubmit={(e) => void responder(e, conversa)}
+                    className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end"
+                  >
+                    <label className="grid flex-1 gap-2 text-xs font-medium text-muted-foreground">
+                      Sua resposta
+                      <textarea
+                        name="resposta"
+                        required
+                        maxLength={1000}
+                        rows={2}
+                        placeholder="Escreva uma resposta para o cliente..."
+                        className={`${campo} min-h-20 resize-y`}
+                      />
+                    </label>
+                    <button disabled={salvandoId === chave} className={`${botao} sm:mb-0.5`}>
+                      <Send className="size-4" aria-hidden="true" />
+                      {salvandoId === chave ? "Enviando..." : "Enviar resposta"}
+                    </button>
+                  </form>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
       <Erro texto={erro} />

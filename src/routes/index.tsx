@@ -9,6 +9,7 @@ import {
   solicitarAgendamento,
   type DadosAgendamento,
 } from "@/services/agendamentos";
+import { enviarMensagemContato } from "@/services/mensagens";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -145,6 +146,8 @@ function Index() {
   const [erroAgendamento, setErroAgendamento] = useState("");
   const [agendamentoConfirmado, setAgendamentoConfirmado] = useState(false);
   const [mensagemEnviada, setMensagemEnviada] = useState(false);
+  const [enviandoMensagem, setEnviandoMensagem] = useState(false);
+  const [erroMensagem, setErroMensagem] = useState("");
 
   function abrirAgendamento() {
     setErroAgendamento("");
@@ -154,6 +157,7 @@ function Index() {
 
   function abrirMensagem() {
     setMensagemEnviada(false);
+    setErroMensagem("");
     setPainelMensagem(true);
   }
 
@@ -205,10 +209,28 @@ function Index() {
     }
   }
 
-  function enviarMensagem(event: FormEvent<HTMLFormElement>) {
+  async function enviarMensagem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    event.currentTarget.reset();
-    setMensagemEnviada(true);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    setErroMensagem("");
+    setMensagemEnviada(false);
+    setEnviandoMensagem(true);
+    try {
+      await enviarMensagemContato({
+        nome: String(form.get("nome") ?? ""),
+        email: String(form.get("email") ?? ""),
+        conteudo: String(form.get("mensagem") ?? ""),
+      });
+      formElement.reset();
+      setMensagemEnviada(true);
+    } catch (error) {
+      setErroMensagem(
+        error instanceof Error ? error.message : "Não foi possível enviar a mensagem.",
+      );
+    } finally {
+      setEnviandoMensagem(false);
+    }
   }
 
   return (
@@ -508,7 +530,7 @@ function Index() {
       {painelMensagem && (
         <Painel titulo="Fale conosco" onFechar={() => setPainelMensagem(false)}>
           <p className="text-sm text-muted-foreground">
-            Envie sua mensagem e nossa equipe responde no seu e-mail.
+            Envie sua mensagem para que nossa equipe possa entrar em contato.
           </p>
           <form className="mt-6 grid gap-5" onSubmit={enviarMensagem}>
             <label className="text-sm font-medium" htmlFor="mensagem-nome">
@@ -517,6 +539,7 @@ function Index() {
                 id="mensagem-nome"
                 name="nome"
                 autoComplete="name"
+                maxLength={120}
                 required
                 className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-ring"
               />
@@ -528,6 +551,7 @@ function Index() {
                 name="email"
                 type="email"
                 autoComplete="email"
+                maxLength={254}
                 required
                 className="mt-2 w-full rounded-lg border border-input bg-background px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-ring"
               />
@@ -538,6 +562,7 @@ function Index() {
                 id="mensagem-texto"
                 name="mensagem"
                 rows={5}
+                maxLength={1000}
                 required
                 className="mt-2 w-full resize-none rounded-lg border border-input bg-background px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-ring"
               />
@@ -547,11 +572,18 @@ function Index() {
                 Mensagem enviada. Em breve entraremos em contato.
               </p>
             )}
+            {erroMensagem && (
+              <p className="text-sm text-destructive" role="alert">
+                {erroMensagem}
+              </p>
+            )}
             <button
               type="submit"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.03]"
+              disabled={enviandoMensagem}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.03] disabled:cursor-wait disabled:opacity-60"
             >
-              Enviar mensagem <Send className="size-4" />
+              {enviandoMensagem ? "Enviando..." : "Enviar mensagem"}
+              {!enviandoMensagem && <Send className="size-4" />}
             </button>
           </form>
         </Painel>

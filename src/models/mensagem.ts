@@ -8,3 +8,13 @@ export type Mensagem = {
   resposta: string | null;
   status: string;
 };
+
+export type ContatoMensagem = {
+  id: number;
+  nome: string;
+  email: string;
+  conteudo: string;
+  resposta: string | null;
+  status: string;
+  criadoEm: string;
+};
