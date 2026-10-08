@@ -22,7 +22,7 @@ export class ErroAgendamentoApi extends Error {
   }
 }
 
-const apiUrl = (import.meta.env["VITE_API_URL"] || "http://localhost:8081").replace(/\/+$/, "");
+const apiUrl = (import.meta.env["VITE_API_URL"] || "http://localhost:8080").replace(/\/+$/, "");
 const pendingVisitKey = "techocean.agendamento.pendente";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

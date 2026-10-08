@@ -22,7 +22,6 @@ public class Relatorio {
     private String nome; //remetente
 
     @Column(nullable = false)
-    private String link_documentos
+    private String link_documentos;
 
-    
 }
