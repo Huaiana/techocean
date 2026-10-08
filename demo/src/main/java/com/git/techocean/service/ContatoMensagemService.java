@@ -45,6 +45,12 @@ public class ContatoMensagemService {
         return repository.save(contato);
     }
 
+    public void deletar(Long id) {
+        ContatoMensagem contato = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mensagem não encontrada."));
+        repository.delete(contato);
+    }
+
     private String validarTexto(String valor, String campo, int limite) {
         if (valor == null || valor.trim().isEmpty()) {
             throw erro("O campo '" + campo + "' é obrigatório.");

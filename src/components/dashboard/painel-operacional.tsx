@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { CheckCheck, Mail, MessageSquareText, Send, UserRound } from "lucide-react";
+import { CheckCheck, Mail, MessageSquareText, Send, Trash2, UserRound } from "lucide-react";
 import type { Carga } from "@/models/carga";
 import type { Cliente } from "@/models/cliente";
 import type { Agendamento } from "@/models/agendamento";
@@ -19,6 +19,8 @@ import {
   listarMensagensContato,
   responderMensagem,
   responderMensagemContato,
+  deletarMensagemCliente,
+  deletarMensagemContato,
 } from "@/services/mensagens";
 import { atualizarOperacao, cadastrarOperacao, listarOperacoes } from "@/services/operacoes";
 import { atualizarOrcamento, cadastrarOrcamento, listarOrcamentos } from "@/services/orcamentos";
@@ -33,6 +35,10 @@ import { cadastrarAdministrador } from "@/services/usuarios-admin";
 const campo = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 const botao =
   "rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60";
+const botaoSecundario =
+  "inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold disabled:opacity-60";
+const botaoDestrutivo =
+  "inline-flex items-center gap-2 rounded-full border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive disabled:opacity-60";
 
 function Erro({ texto }: { texto: string }) {
   return texto ? (
@@ -869,7 +875,7 @@ export function Mensagens() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
-  const [salvandoId, setSalvandoId] = useState<string | null>(null);
+  const [processandoId, setProcessandoId] = useState<string | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -909,7 +915,7 @@ export function Mensagens() {
     setSucesso("");
     const item = conversa.mensagem;
     const chave = `${conversa.tipo}-${item.id}`;
-    setSalvandoId(chave);
+    setProcessandoId(chave);
     const form = evento.currentTarget;
     const resposta = String(new FormData(form).get("resposta")).trim();
     try {
@@ -933,7 +939,35 @@ export function Mensagens() {
     } catch (error) {
       setErro(error instanceof Error ? error.message : "Não foi possível responder à mensagem.");
     } finally {
-      setSalvandoId(null);
+      setProcessandoId(null);
+    }
+  }
+
+  async function deletar(conversa: Conversa) {
+    const item = conversa.mensagem;
+    const chave = `${conversa.tipo}-${item.id}`;
+    const nome = conversa.tipo === "contato" ? item.nome : item.cliente?.nome || "cliente";
+    if (!window.confirm(`Deseja realmente deletar a mensagem de ${nome}?`)) {
+      return;
+    }
+
+    setErro("");
+    setSucesso("");
+    setProcessandoId(chave);
+    try {
+      if (conversa.tipo === "contato") {
+        await deletarMensagemContato(item.id);
+      } else {
+        await deletarMensagemCliente(item.id);
+      }
+      setItens((atuais) =>
+        atuais.filter((x) => !(x.tipo === conversa.tipo && x.mensagem.id === item.id)),
+      );
+      setSucesso("Mensagem deletada.");
+    } catch (error) {
+      setErro(error instanceof Error ? error.message : "Não foi possível deletar a mensagem.");
+    } finally {
+      setProcessandoId(null);
     }
   }
 
@@ -1049,23 +1083,34 @@ export function Mensagens() {
 
                   <form
                     onSubmit={(e) => void responder(e, conversa)}
-                    className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end"
+                    className="grid gap-3 border-t border-border pt-4"
                   >
-                    <label className="grid flex-1 gap-2 text-xs font-medium text-muted-foreground">
-                      Sua resposta
+                    <label className="grid gap-2 text-sm font-medium">
+                      Responder mensagem
                       <textarea
                         name="resposta"
                         required
                         maxLength={1000}
-                        rows={2}
-                        placeholder="Escreva uma resposta para o cliente..."
-                        className={`${campo} min-h-20 resize-y`}
+                        rows={3}
+                        placeholder="Escreva sua resposta..."
+                        className={`${campo} resize-y`}
                       />
                     </label>
-                    <button disabled={salvandoId === chave} className={`${botao} sm:mb-0.5`}>
-                      <Send className="size-4" aria-hidden="true" />
-                      {salvandoId === chave ? "Enviando..." : "Enviar resposta"}
-                    </button>
+                    <div className="flex flex-wrap gap-2">
+                      <button disabled={processandoId === chave} className={botaoSecundario}>
+                        <Send className="size-3.5" aria-hidden="true" />
+                        {processandoId === chave ? "Enviando..." : "Enviar resposta"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={processandoId === chave}
+                        onClick={() => void deletar(conversa)}
+                        className={botaoDestrutivo}
+                      >
+                        <Trash2 className="size-3.5" aria-hidden="true" />
+                        {processandoId === chave ? "Aguarde..." : "Deletar mensagem"}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </article>

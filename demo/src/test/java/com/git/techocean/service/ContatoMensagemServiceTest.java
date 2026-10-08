@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,5 +50,24 @@ class ContatoMensagemServiceTest {
         assertEquals("Vamos ajudar.", respondida.getResposta());
         assertEquals("RESPONDIDO", respondida.getStatus());
         verify(repository).save(contato);
+    }
+
+    @Test
+    void deletesExistingContactMessage() {
+        ContatoMensagem contato = new ContatoMensagem("Ana", "ana@example.com", "Preciso de ajuda.");
+        when(repository.findById(7L)).thenReturn(Optional.of(contato));
+
+        service.deletar(7L);
+
+        verify(repository).delete(contato);
+    }
+
+    @Test
+    void rejectsDeletingMissingContactMessage() {
+        when(repository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> service.deletar(7L));
+
+        verify(repository, never()).delete(any(ContatoMensagem.class));
     }
 }

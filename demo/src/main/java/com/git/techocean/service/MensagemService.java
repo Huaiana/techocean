@@ -48,4 +48,10 @@ public class MensagemService {
         mensagem.setStatus("RESPONDIDO");
         return mensagemRepository.save(mensagem);
     }
+
+    public void deletar(Long id) {
+        Mensagem mensagem = mensagemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mensagem não encontrada."));
+        mensagemRepository.delete(mensagem);
+    }
 }

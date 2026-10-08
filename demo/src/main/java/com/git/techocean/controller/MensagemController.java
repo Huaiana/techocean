@@ -1,6 +1,7 @@
 package com.git.techocean.controller;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,11 @@ public class MensagemController {
             @RequestBody Mensagem resposta) {
         Mensagem mensagem = mensagemService.responder(id, resposta.getResposta());
         return new ResponseEntity<>(mensagem, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deletar(@PathVariable Long id) {
+        mensagemService.deletar(id);
+        return ResponseEntity.ok(Map.of("message", "Mensagem deletada."));
     }
 }

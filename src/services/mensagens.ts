@@ -26,3 +26,9 @@ export const responderMensagem = (id: number, resposta: string) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ resposta }),
   });
+
+export const deletarMensagemCliente = (id: number) =>
+  requisicaoApi<{ message: string }>(`/mensagens/${id}`, { method: "DELETE" });
+
+export const deletarMensagemContato = (id: number) =>
+  requisicaoApi<{ message: string }>(`/mensagens/contatos/${id}`, { method: "DELETE" });
