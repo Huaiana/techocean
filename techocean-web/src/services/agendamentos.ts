@@ -1,3 +1,6 @@
+import type { Agendamento } from "@/models/agendamento";
+import { parametrosApi, requisicaoApi } from "@/services/api";
+
 export interface DadosAgendamento {
   nome: string;
   telefone: string;
@@ -22,6 +25,14 @@ export class ErroAgendamentoApi extends Error {
   }
 }
 
+export const listarAgendamentos = () => requisicaoApi<Agendamento[]>("/agendamentos");
+
+export const atualizarAgendamento = (id: number, confirmado: boolean) =>
+  requisicaoApi<Agendamento>(
+    `/agendamentos/${id}/status?${parametrosApi({ status: confirmado ? "confirmado" : "pendente" })}`,
+    { method: "PUT" },
+  );
+
 const apiUrl = (import.meta.env["VITE_API_URL"] || "http://localhost:8080").replace(/\/+$/, "");
 const pendingVisitKey = "techocean.agendamento.pendente";
 
@@ -29,9 +40,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export async function solicitarAgendamento(
-  solicitacao: SolicitacaoAgendamento,
-): Promise<void> {
+export async function solicitarAgendamento(solicitacao: SolicitacaoAgendamento): Promise<void> {
   const response = await fetch(`${apiUrl}/agendamentos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
