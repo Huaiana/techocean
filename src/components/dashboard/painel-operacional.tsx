@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { CheckCheck, Mail, MessageSquareText, Send, UserRound } from "lucide-react";
 import type { Carga } from "@/models/carga";
 import type { Cliente } from "@/models/cliente";
 import type { Agendamento } from "@/models/agendamento";
@@ -903,39 +904,122 @@ export function Mensagens() {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">Mensagens recebidas</h2>
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Mensagens recebidas</h2>
+          <p className="text-sm text-muted-foreground">
+            Acompanhe as conversas e responda aos clientes.
+          </p>
+        </div>
+        {!carregando && !erro && itens.length > 0 && (
+          <span className="rounded-full border border-border bg-card px-3 py-1 text-sm font-medium">
+            {itens.length} {itens.length === 1 ? "mensagem" : "mensagens"}
+          </span>
+        )}
+      </header>
       {carregando || (erro && !itens.length) ? (
         <TabelaVazia carregando={carregando} vazio="" />
       ) : !itens.length ? (
         <TabelaVazia carregando={false} vazio="Nenhuma mensagem recebida." />
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-5">
           {itens.map((x) => (
-            <article key={x.id} className="grid gap-3 rounded-xl border border-border bg-card p-4">
-              <p className="font-semibold">
-                {x.cliente?.nome} · {x.cliente?.email} · {x.status}
-              </p>
-              <p className="whitespace-pre-wrap text-sm">{x.conteudo}</p>
-              {x.resposta && (
-                <p className="rounded-lg bg-secondary p-3 text-sm">
-                  <strong>Resposta:</strong> {x.resposta}
-                </p>
-              )}
-              <form
-                onSubmit={(e) => void responder(e, x)}
-                className="flex flex-col gap-2 sm:flex-row"
-              >
-                <input
-                  name="resposta"
-                  required
-                  maxLength={1000}
-                  placeholder="Escreva a resposta..."
-                  className={campo}
-                />
-                <button disabled={salvandoId === x.id} className={botao}>
-                  {salvandoId === x.id ? "Enviando..." : "Responder"}
-                </button>
-              </form>
+            <article
+              key={x.id}
+              className="overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+            >
+              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-secondary/40 px-5 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-10 place-items-center rounded-full bg-primary/15 text-primary">
+                    <MessageSquareText className="size-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3 className="font-semibold">Conversa #{x.id}</h3>
+                    <p className="text-xs text-muted-foreground">Atendimento ao cliente</p>
+                  </div>
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                    x.resposta
+                      ? "border-primary/30 bg-primary/10 text-primary"
+                      : "border-amber-500/30 bg-amber-500/10 text-amber-200"
+                  }`}
+                >
+                  {x.resposta ? (
+                    <CheckCheck className="size-3.5" aria-hidden="true" />
+                  ) : (
+                    <MessageSquareText className="size-3.5" aria-hidden="true" />
+                  )}
+                  {x.status}
+                </span>
+              </header>
+              <div className="grid gap-5 p-5">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-9 place-items-center rounded-full bg-muted text-muted-foreground">
+                      <UserRound className="size-4" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Cliente</p>
+                      <p className="text-sm font-medium">{x.cliente?.nome || "Não informado"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail className="size-4 shrink-0" aria-hidden="true" />
+                    <span className="break-all">{x.cliente?.email || "E-mail não informado"}</span>
+                  </div>
+                  {x.especialista && (
+                    <p className="text-xs text-muted-foreground">
+                      Atendimento:{" "}
+                      <span className="font-medium text-foreground">{x.especialista}</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="max-w-3xl rounded-2xl rounded-tl-sm border border-border bg-secondary/50 p-4">
+                    <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      <MessageSquareText className="size-3.5" aria-hidden="true" />
+                      Mensagem do cliente
+                    </p>
+                    <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      {x.conteudo}
+                    </p>
+                  </div>
+                  {x.resposta && (
+                    <div className="ml-auto w-full max-w-3xl rounded-2xl rounded-tr-sm border border-primary/25 bg-primary/10 p-4">
+                      <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                        <CheckCheck className="size-3.5" aria-hidden="true" />
+                        Resposta da equipe
+                      </p>
+                      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                        {x.resposta}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <form
+                  onSubmit={(e) => void responder(e, x)}
+                  className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end"
+                >
+                  <label className="grid flex-1 gap-2 text-xs font-medium text-muted-foreground">
+                    Sua resposta
+                    <textarea
+                      name="resposta"
+                      required
+                      maxLength={1000}
+                      rows={2}
+                      placeholder="Escreva uma resposta para o cliente..."
+                      className={`${campo} min-h-20 resize-y`}
+                    />
+                  </label>
+                  <button disabled={salvandoId === x.id} className={`${botao} sm:mb-0.5`}>
+                    <Send className="size-4" aria-hidden="true" />
+                    {salvandoId === x.id ? "Enviando..." : "Enviar resposta"}
+                  </button>
+                </form>
+              </div>
             </article>
           ))}
         </div>

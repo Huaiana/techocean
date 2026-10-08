@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Printer } from "lucide-react";
+import { Printer, RefreshCw, Trash2 } from "lucide-react";
 import type { Cliente } from "@/models/cliente";
 import type { Relatorio } from "@/models/relatorio";
 import { listarClientes } from "@/services/clientes";
@@ -30,6 +30,7 @@ export function RelatorioClientes() {
   const [relatorio, setRelatorio] = useState<Relatorio | null>(null);
   const [carregandoClientes, setCarregandoClientes] = useState(true);
   const [carregandoRelatorio, setCarregandoRelatorio] = useState(false);
+  const [atualizacao, setAtualizacao] = useState(0);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export function RelatorioClientes() {
   useEffect(() => {
     if (!clienteId) {
       setRelatorio(null);
+      setCarregandoRelatorio(false);
       return;
     }
 
@@ -78,7 +80,7 @@ export function RelatorioClientes() {
     return () => {
       ativo = false;
     };
-  }, [clienteId]);
+  }, [atualizacao, clienteId]);
 
   const operacoesPorSolicitacao = new Map(
     relatorio?.operacoes.map((operacao) => [operacao.solicitacao.id, operacao]) ?? [],
@@ -107,15 +109,41 @@ export function RelatorioClientes() {
             ))}
           </select>
         </label>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          disabled={!relatorio || carregandoRelatorio}
-          className={botao}
-        >
-          <Printer className="size-4" aria-hidden="true" />
-          Imprimir relatório
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            disabled={!relatorio || carregandoRelatorio}
+            className={`${botao} px-3 py-1.5 text-xs`}
+          >
+            <Printer className="size-3.5" aria-hidden="true" />
+            Imprimir relatório
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setErro("");
+              setAtualizacao((atual) => atual + 1);
+            }}
+            disabled={!clienteId || carregandoRelatorio}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-semibold disabled:opacity-60 print:hidden"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            Atualizar
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setClienteId("");
+              setErro("");
+            }}
+            disabled={!clienteId}
+            className="inline-flex items-center gap-2 rounded-full border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive disabled:opacity-60 print:hidden"
+          >
+            <Trash2 className="size-3.5" aria-hidden="true" />
+            Deletar
+          </button>
+        </div>
       </section>
 
       {erro && (
