@@ -80,12 +80,12 @@ npm run preview
 O arquivo `render.yaml` prepara a API Spring Boot e um banco PostgreSQL de teste no Render:
 
 1. No Render, crie um Blueprint a partir do repositório `Huaiana/techocean` e confirme a criação dos recursos definidos em `render.yaml`.
-2. Aguarde o serviço `techocean-api` ficar disponível e use a URL pública exibida no painel do Render como `VITE_API_URL` no ambiente de build do site.
+2. Aguarde o serviço `techocean-api` ficar disponível. O arquivo `.env.production` configura o build de produção do site para usar `https://techocean-api.onrender.com`; se o Render mostrar outro domínio para o serviço, atualize esse arquivo antes de publicar o site.
 3. Depois de conectar o projeto Lovable ao GitHub na branch `main`, sincronize as alterações e publique novamente o projeto para que ele use essa URL.
 
 O deploy usa os planos gratuitos do Render para teste. Serviços gratuitos podem suspender após inatividade e o banco gratuito é temporário; não use essa configuração para dados importantes ou de produção. O banco criado no Render começa vazio: dados gravados apenas no H2 local não são copiados.
 
-Para desenvolvimento local depois da publicação, configure `VITE_API_URL` em `.env.local` na raiz do repositório com a URL local da API (`http://localhost:8080` ou `http://localhost:8081`, conforme a porta usada). Esse arquivo local não deve ser enviado ao Git.
+Para desenvolvimento local depois da publicação, mantenha `VITE_API_URL` em `.env` apontando para a URL local da API (`http://localhost:8080` ou `http://localhost:8081`, conforme a porta usada). Builds de produção usam `.env.production`; valores de `VITE_API_URL` configurados diretamente no ambiente do provedor têm precedência sobre os arquivos `.env`.
 
 ## API REST
 
