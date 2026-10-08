@@ -14,6 +14,7 @@ import {
   Solicitacoes,
   UsuariosAdmin,
 } from "@/components/dashboard/painel-operacional";
+import { RelatorioClientes } from "@/components/dashboard/relatorio-clientes";
 
 export const Route = createFileRoute("/dashboard/$secao")({
   loader: ({ params }) => {
@@ -35,25 +36,46 @@ function SecaoPage() {
       <p className="eyebrow mb-2">Painel</p>
       <h1 className="text-3xl font-bold">{secao.nome}</h1>
       <p className="mb-8 mt-2 text-muted-foreground">{secao.descricao}</p>
-      {slug === "carga" ? <Cargas />
-        : slug === "cliente" ? <Clientes />
-          : slug === "conteiner" ? <Conteineres />
-            : slug === "mensagens" ? <PainelMensagens />
-              : slug === "operacao" ? <Operacoes />
-                : slug === "orcamento" ? <Orcamentos />
-                  : slug === "usuario" ? <UsuariosAdmin />
-                    : slug === "servico" ? <Servicos />
-                      : slug === "solicitacao" ? <Solicitacoes />
-                        : (
+      {slug === "carga" ? (
+        <Cargas />
+      ) : slug === "cliente" ? (
+        <Clientes />
+      ) : slug === "conteiner" ? (
+        <Conteineres />
+      ) : slug === "mensagens" ? (
+        <PainelMensagens />
+      ) : slug === "operacao" ? (
+        <Operacoes />
+      ) : slug === "orcamento" ? (
+        <Orcamentos />
+      ) : slug === "usuario" ? (
+        <UsuariosAdmin />
+      ) : slug === "servico" ? (
+        <Servicos />
+      ) : slug === "solicitacao" ? (
+        <Solicitacoes />
+      ) : slug === "relatorio" ? (
+        <RelatorioClientes />
+      ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-card text-muted-foreground">
-              <tr>{secao.colunas.map((c) => <th key={c} className="px-4 py-3 font-medium">{c}</th>)}</tr>
+              <tr>
+                {secao.colunas.map((c) => (
+                  <th key={c} className="px-4 py-3 font-medium">
+                    {c}
+                  </th>
+                ))}
+              </tr>
             </thead>
             <tbody>
               {secao.exemplos.map((linha, i) => (
                 <tr key={i} className="border-t border-border">
-                  {linha.map((v, j) => <td key={j} className="px-4 py-3">{v}</td>)}
+                  {linha.map((v, j) => (
+                    <td key={j} className="px-4 py-3">
+                      {v}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -83,7 +105,10 @@ function Clientes() {
         if (ativa) setClientes(resultado);
       })
       .catch((error: unknown) => {
-        if (ativa) setErro(error instanceof Error ? error.message : "Não foi possível carregar os clientes.");
+        if (ativa)
+          setErro(
+            error instanceof Error ? error.message : "Não foi possível carregar os clientes.",
+          );
       })
       .finally(() => {
         if (ativa) setCarregando(false);
@@ -122,7 +147,10 @@ function Clientes() {
 
   return (
     <div className="grid gap-8">
-      <form onSubmit={cadastrar} className="grid max-w-3xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2">
+      <form
+        onSubmit={cadastrar}
+        className="grid max-w-3xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
+      >
         <h2 className="text-lg font-semibold sm:col-span-2">Cadastrar cliente</h2>
         <label className="grid gap-1 text-sm">
           Nome
@@ -130,7 +158,14 @@ function Clientes() {
         </label>
         <label className="grid gap-1 text-sm">
           CPF/CNPJ
-          <input name="cpfCnpj" required inputMode="numeric" minLength={11} maxLength={18} className={campo} />
+          <input
+            name="cpfCnpj"
+            required
+            inputMode="numeric"
+            minLength={11}
+            maxLength={18}
+            className={campo}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Telefone
@@ -144,11 +179,22 @@ function Clientes() {
           Senha
           <input name="senha" required type="password" minLength={8} className={campo} />
         </label>
-        <button disabled={salvando} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:col-span-2 sm:justify-self-start">
+        <button
+          disabled={salvando}
+          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+        >
           {salvando ? "Cadastrando..." : "Cadastrar cliente"}
         </button>
-        {erro && <p role="alert" className="text-sm text-destructive sm:col-span-2">{erro}</p>}
-        {sucesso && <p role="status" className="text-sm text-primary sm:col-span-2">{sucesso}</p>}
+        {erro && (
+          <p role="alert" className="text-sm text-destructive sm:col-span-2">
+            {erro}
+          </p>
+        )}
+        {sucesso && (
+          <p role="status" className="text-sm text-primary sm:col-span-2">
+            {sucesso}
+          </p>
+        )}
       </form>
 
       <section>
@@ -163,7 +209,9 @@ function Clientes() {
               <thead className="bg-card text-muted-foreground">
                 <tr>
                   {["Código", "Nome", "CPF/CNPJ", "Telefone", "E-mail"].map((titulo) => (
-                    <th key={titulo} className="px-4 py-3 font-medium">{titulo}</th>
+                    <th key={titulo} className="px-4 py-3 font-medium">
+                      {titulo}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -201,7 +249,8 @@ function Cargas() {
         if (ativa) setCargas(resultado);
       })
       .catch((error: unknown) => {
-        if (ativa) setErro(error instanceof Error ? error.message : "Não foi possível carregar as cargas.");
+        if (ativa)
+          setErro(error instanceof Error ? error.message : "Não foi possível carregar as cargas.");
       })
       .finally(() => {
         if (ativa) setCarregando(false);
@@ -241,7 +290,10 @@ function Cargas() {
 
   return (
     <div className="grid gap-8">
-      <form onSubmit={cadastrar} className="grid max-w-3xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2">
+      <form
+        onSubmit={cadastrar}
+        className="grid max-w-3xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
+      >
         <h2 className="text-lg font-semibold sm:col-span-2">Cadastrar carga</h2>
         <label className="grid gap-1 text-sm sm:col-span-2">
           Descrição
@@ -267,11 +319,22 @@ function Cargas() {
           Destino
           <input name="destino" required maxLength={255} className={campo} />
         </label>
-        <button disabled={salvando} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:col-span-2 sm:justify-self-start">
+        <button
+          disabled={salvando}
+          className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground disabled:opacity-60 sm:col-span-2 sm:justify-self-start"
+        >
           {salvando ? "Cadastrando..." : "Cadastrar carga"}
         </button>
-        {erro && <p role="alert" className="text-sm text-destructive sm:col-span-2">{erro}</p>}
-        {sucesso && <p role="status" className="text-sm text-primary sm:col-span-2">{sucesso}</p>}
+        {erro && (
+          <p role="alert" className="text-sm text-destructive sm:col-span-2">
+            {erro}
+          </p>
+        )}
+        {sucesso && (
+          <p role="status" className="text-sm text-primary sm:col-span-2">
+            {sucesso}
+          </p>
+        )}
       </form>
 
       <section>
@@ -285,8 +348,18 @@ function Cargas() {
             <table className="w-full text-left text-sm">
               <thead className="bg-card text-muted-foreground">
                 <tr>
-                  {["Código", "Descrição", "Peso (kg)", "Volume (m³)", "Tipo", "Origem", "Destino"].map((titulo) => (
-                    <th key={titulo} className="px-4 py-3 font-medium">{titulo}</th>
+                  {[
+                    "Código",
+                    "Descrição",
+                    "Peso (kg)",
+                    "Volume (m³)",
+                    "Tipo",
+                    "Origem",
+                    "Destino",
+                  ].map((titulo) => (
+                    <th key={titulo} className="px-4 py-3 font-medium">
+                      {titulo}
+                    </th>
                   ))}
                 </tr>
               </thead>

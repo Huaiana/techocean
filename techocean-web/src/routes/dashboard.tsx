@@ -5,7 +5,10 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Painel — Techocean" },
-      { name: "description", content: "Painel de gestão Techocean: cargas, clientes, contêineres, mensagens e mais." },
+      {
+        name: "description",
+        content: "Painel de gestão Techocean: cargas, clientes, contêineres, mensagens e mais.",
+      },
       { property: "og:title", content: "Painel — Techocean" },
       { property: "og:description", content: "Painel de gestão Techocean." },
       { property: "og:type", content: "website" },
@@ -18,7 +21,7 @@ export const Route = createFileRoute("/dashboard")({
 function DashboardLayout() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-card md:flex print:hidden">
         <Link to="/" className="px-6 py-6 font-display text-lg font-bold tracking-tight">
           Techocean
         </Link>
@@ -45,10 +48,21 @@ function DashboardLayout() {
         </nav>
       </aside>
       <div className="flex-1">
-        <nav className="flex gap-2 overflow-x-auto border-b border-border px-4 py-3 md:hidden">
-          <Link to="/dashboard" className="whitespace-nowrap rounded-full border border-input px-3 py-1 text-xs">Início</Link>
+        <nav className="flex gap-2 overflow-x-auto border-b border-border px-4 py-3 md:hidden print:hidden">
+          <Link
+            to="/dashboard"
+            className="whitespace-nowrap rounded-full border border-input px-3 py-1 text-xs"
+          >
+            Início
+          </Link>
           {secoes.map((s) => (
-            <Link key={s.slug} to="/dashboard/$secao" params={{ secao: s.slug }} className="whitespace-nowrap rounded-full border border-input px-3 py-1 text-xs" activeProps={{ className: "bg-primary text-primary-foreground" }}>
+            <Link
+              key={s.slug}
+              to="/dashboard/$secao"
+              params={{ secao: s.slug }}
+              className="whitespace-nowrap rounded-full border border-input px-3 py-1 text-xs"
+              activeProps={{ className: "bg-primary text-primary-foreground" }}
+            >
               {s.nome}
             </Link>
           ))}

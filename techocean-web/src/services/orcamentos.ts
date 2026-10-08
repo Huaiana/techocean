@@ -3,6 +3,9 @@ import { parametrosApi, requisicaoApi } from "@/services/api";
 
 export const listarOrcamentos = () => requisicaoApi<Orcamento[]>("/orcamentos");
 
+export const listarOrcamentosDoCliente = (clienteId: number) =>
+  requisicaoApi<Orcamento[]>(`/orcamentos/cliente/${clienteId}`);
+
 export const cadastrarOrcamento = (dados: {
   clienteId: number;
   cargaId: number;

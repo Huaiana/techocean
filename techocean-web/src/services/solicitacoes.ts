@@ -3,6 +3,9 @@ import { parametrosApi, requisicaoApi } from "@/services/api";
 
 export const listarSolicitacoes = () => requisicaoApi<Solicitacao[]>("/solicitacoes");
 
+export const listarSolicitacoesDoCliente = (clienteId: number) =>
+  requisicaoApi<Solicitacao[]>(`/solicitacoes/cliente/${clienteId}`);
+
 export const cadastrarSolicitacao = (dados: {
   clienteId: number;
   cargaId: number;
