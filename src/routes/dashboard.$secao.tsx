@@ -7,7 +7,6 @@ import type { Cliente as ClienteModel } from "@/models/cliente";
 import { cadastrarCliente, listarClientes } from "@/services/clientes";
 import {
   Conteineres,
-  Mensagens as PainelMensagens,
   Operacoes,
   Orcamentos,
   Servicos,
@@ -22,20 +21,25 @@ export const Route = createFileRoute("/dashboard/$secao")({
     if (!secao) throw notFound();
     return { slug: secao.slug };
   },
-  notFoundComponent: () => <p className="text-muted-foreground">Seção não encontrada.</p>,
+  notFoundComponent: () => (
+    <p className="text-muted-foreground">Seção não encontrada.</p>
+  ),
   component: SecaoPage,
 });
 
-const campo = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+const campo =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
 function SecaoPage() {
   const { slug } = Route.useLoaderData();
   const secao = secoes.find((s) => s.slug === slug)!;
+
   return (
     <div>
       <p className="eyebrow mb-2">Painel</p>
       <h1 className="text-3xl font-bold">{secao.nome}</h1>
       <p className="mb-8 mt-2 text-muted-foreground">{secao.descricao}</p>
+
       {slug === "carga" ? (
         <Cargas />
       ) : slug === "cliente" ? (
@@ -43,7 +47,7 @@ function SecaoPage() {
       ) : slug === "conteiner" ? (
         <Conteineres />
       ) : slug === "mensagens" ? (
-        <PainelMensagens />
+        <Mensagens />
       ) : slug === "operacao" ? (
         <Operacoes />
       ) : slug === "orcamento" ? (
@@ -86,6 +90,128 @@ function SecaoPage() {
   );
 }
 
+/* ==========================================================================
+   COMPONENTE: MENSAGENS (Atendimento / Chat)
+   ========================================================================== */
+interface MsgModel {
+  id: number;
+  nome: string;
+  email: string;
+  texto: string;
+  respostas: string[];
+}
+
+function Mensagens() {
+  const [msgs, setMsgs] = useState<MsgModel[]>([
+    {
+      id: 1,
+      nome: "Carlos Lima",
+      email: "carlos@empresa.com",
+      texto: "Gostaria de um orçamento para amarração de bobinas.",
+      respostas: [],
+    },
+    {
+      id: 2,
+      nome: "Ana Souza",
+      email: "ana@logistica.com",
+      texto: "Vocês atendem no porto de Paranaguá?",
+      respostas: [],
+    },
+  ]);
+  const [ativa, setAtiva] = useState<number>(1);
+  const [resposta, setResposta] = useState<string>("");
+
+  const atual = msgs.find((m) => m.id === ativa) ?? msgs[0];
+
+  function responder(e: FormEvent) {
+    e.preventDefault();
+    if (!resposta.trim() || !atual) return;
+
+    setMsgs((lista) =>
+      lista.map((m) =>
+        m.id === atual.id
+          ? { ...m, respostas: [...m.respostas, resposta.trim()] }
+          : m
+      )
+    );
+    setResposta("");
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-[280px_1fr]">
+      {/* Lista de Mensagens na Esquerda */}
+      <ul className="rounded-xl border border-border overflow-hidden bg-card">
+        {msgs.map((m) => (
+          <li key={m.id}>
+            <button
+              type="button"
+              onClick={() => setAtiva(m.id)}
+              className={`w-full border-b border-border px-4 py-3 text-left text-sm transition-colors last:border-none ${
+                m.id === atual?.id ? "bg-secondary font-medium" : "hover:bg-muted/50"
+              }`}
+            >
+              <span className="font-semibold block text-foreground">{m.nome}</span>
+              <span className="block truncate text-xs text-muted-foreground">{m.texto}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      {/* Painel da Mensagem Selecionada na Direita */}
+      {atual ? (
+        <div className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 min-h-[400px]">
+          <div className="space-y-4">
+            <div className="border-b border-border pb-2">
+              <h3 className="font-semibold">{atual.nome}</h3>
+              <p className="text-xs text-muted-foreground">{atual.email}</p>
+            </div>
+
+            <div className="rounded-lg bg-muted/40 border border-border p-4 text-sm text-foreground">
+              {atual.texto}
+            </div>
+
+            {/* Balões de Resposta */}
+            <div className="flex flex-col gap-2">
+              {atual.respostas.map((r, i) => (
+                <div
+                  key={i}
+                  className="self-end max-w-[80%] rounded-lg bg-primary p-3 text-sm text-primary-foreground shadow-sm"
+                >
+                  {r}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Form de Envio */}
+          <form onSubmit={responder} className="mt-6 flex gap-2 border-t border-border pt-4">
+            <input
+              type="text"
+              value={resposta}
+              onChange={(e) => setResposta(e.target.value)}
+              placeholder="Escreva sua resposta..."
+              className={campo}
+            />
+            <button
+              type="submit"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Responder
+            </button>
+          </form>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center rounded-xl border border-border p-5 text-sm text-muted-foreground">
+          Nenhuma mensagem selecionada.
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   COMPONENTE: CLIENTES
+   ========================================================================== */
 function Clientes() {
   const [clientes, setClientes] = useState<ClienteModel[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -107,7 +233,9 @@ function Clientes() {
       .catch((error: unknown) => {
         if (ativa)
           setErro(
-            error instanceof Error ? error.message : "Não foi possível carregar os clientes.",
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar os clientes."
           );
       })
       .finally(() => {
@@ -139,7 +267,11 @@ function Clientes() {
       setSucesso("Cliente cadastrado com sucesso.");
       form.reset();
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Não foi possível cadastrar o cliente.");
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível cadastrar o cliente."
+      );
     } finally {
       setSalvando(false);
     }
@@ -151,7 +283,9 @@ function Clientes() {
         onSubmit={cadastrar}
         className="grid max-w-3xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
       >
-        <h2 className="text-lg font-semibold sm:col-span-2">Cadastrar cliente</h2>
+        <h2 className="text-lg font-semibold sm:col-span-2">
+          Cadastrar cliente
+        </h2>
         <label className="grid gap-1 text-sm">
           Nome
           <input name="nome" required maxLength={255} className={campo} />
@@ -169,15 +303,33 @@ function Clientes() {
         </label>
         <label className="grid gap-1 text-sm">
           Telefone
-          <input name="telefone" required type="tel" maxLength={20} className={campo} />
+          <input
+            name="telefone"
+            required
+            type="tel"
+            maxLength={20}
+            className={campo}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           E-mail
-          <input name="email" required type="email" maxLength={255} className={campo} />
+          <input
+            name="email"
+            required
+            type="email"
+            maxLength={255}
+            className={campo}
+          />
         </label>
         <label className="grid gap-1 text-sm sm:col-span-2">
           Senha
-          <input name="senha" required type="password" minLength={8} className={campo} />
+          <input
+            name="senha"
+            required
+            type="password"
+            minLength={8}
+            className={campo}
+          />
         </label>
         <button
           disabled={salvando}
@@ -200,15 +352,25 @@ function Clientes() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Clientes cadastrados</h2>
         {carregando ? (
-          <p className="text-sm text-muted-foreground">Carregando clientes...</p>
+          <p className="text-sm text-muted-foreground">
+            Carregando clientes...
+          </p>
         ) : clientes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum cliente cadastrado.</p>
+          <p className="text-sm text-muted-foreground">
+            Nenhum cliente cadastrado.
+          </p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm">
               <thead className="bg-card text-muted-foreground">
                 <tr>
-                  {["Código", "Nome", "CPF/CNPJ", "Telefone", "E-mail"].map((titulo) => (
+                  {[
+                    "Código",
+                    "Nome",
+                    "CPF/CNPJ",
+                    "Telefone",
+                    "E-mail",
+                  ].map((titulo) => (
                     <th key={titulo} className="px-4 py-3 font-medium">
                       {titulo}
                     </th>
@@ -234,6 +396,9 @@ function Clientes() {
   );
 }
 
+/* ==========================================================================
+   COMPONENTE: CARGAS
+   ========================================================================== */
 function Cargas() {
   const [cargas, setCargas] = useState<CargaModel[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -250,7 +415,11 @@ function Cargas() {
       })
       .catch((error: unknown) => {
         if (ativa)
-          setErro(error instanceof Error ? error.message : "Não foi possível carregar as cargas.");
+          setErro(
+            error instanceof Error
+              ? error.message
+              : "Não foi possível carregar as cargas."
+          );
       })
       .finally(() => {
         if (ativa) setCarregando(false);
@@ -282,7 +451,11 @@ function Cargas() {
       setSucesso("Carga cadastrada com sucesso.");
       form.reset();
     } catch (error) {
-      setErro(error instanceof Error ? error.message : "Não foi possível cadastrar a carga.");
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível cadastrar a carga."
+      );
     } finally {
       setSalvando(false);
     }
@@ -301,11 +474,25 @@ function Cargas() {
         </label>
         <label className="grid gap-1 text-sm">
           Peso (kg)
-          <input name="peso" type="number" min="0.01" step="any" required className={campo} />
+          <input
+            name="peso"
+            type="number"
+            min="0.01"
+            step="any"
+            required
+            className={campo}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Volume (m³)
-          <input name="volume" type="number" min="0.01" step="any" required className={campo} />
+          <input
+            name="volume"
+            type="number"
+            min="0.01"
+            step="any"
+            required
+            className={campo}
+          />
         </label>
         <label className="grid gap-1 text-sm">
           Tipo de carga
@@ -342,7 +529,9 @@ function Cargas() {
         {carregando ? (
           <p className="text-sm text-muted-foreground">Carregando cargas...</p>
         ) : cargas.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma carga cadastrada.</p>
+          <p className="text-sm text-muted-foreground">
+            Nenhuma carga cadastrada.
+          </p>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm">
