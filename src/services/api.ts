@@ -1,4 +1,8 @@
-const apiUrl = (import.meta.env["VITE_API_URL"] || "http://localhost:8080").replace(/\/+$/, "");
+// Se VITE_API_URL não estiver definida no .env, usa a origem atual da página (ex: http://169.254.16.217:8080)
+const envUrl = import.meta.env["VITE_API_URL"];
+const baseUrl = envUrl && envUrl.trim() !== "" ? envUrl : (typeof window !== "undefined" ? window.location.origin : "http://localhost:8080");
+
+const apiUrl = baseUrl.replace(/\/+$/, "");
 
 export async function requisicaoApi<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiUrl}${path}`, init);
