@@ -91,7 +91,7 @@ function SecaoPage() {
 }
 
 /* ==========================================================================
-   1. RELATÓRIO DE CLIENTES (Interativo com Modal de Detalhes e Ações)
+   1. RELATÓRIO DE CLIENTES (Com abas interativas no Modal de Detalhes)
    ========================================================================== */
 function RelatorioClientes() {
   const [clientes, setClientes] = useState<ClienteModel[]>([
@@ -113,8 +113,9 @@ function RelatorioClientes() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
 
-  // Estado para controlar o modal do cliente selecionado
+  // Estado para controlar o cliente selecionado e a aba ativa no modal ("geral" | "historico")
   const [clienteSelecionado, setClienteSelecionado] = useState<ClienteModel | null>(null);
+  const [abaModal, setAbaModal] = useState<"geral" | "historico">("geral");
 
   async function carregarDados() {
     setCarregando(true);
@@ -143,8 +144,13 @@ function RelatorioClientes() {
     window.print();
   }
 
+  function handleAbrirModal(cliente: ClienteModel) {
+    setClienteSelecionado(cliente);
+    setAbaModal("geral"); // Abre na visão geral por padrão
+  }
+
   function handleDeletar(e: React.MouseEvent, id: number | string) {
-    e.stopPropagation(); // Impede de abrir o modal ao clicar diretamente em deletar
+    e.stopPropagation(); // Evita abrir o modal ao clicar em deletar
     if (confirm("Tem certeza que deseja excluir este cliente do relatório?")) {
       setClientes((atuais) => atuais.filter((cliente) => cliente.id !== id));
       if (clienteSelecionado?.id === id) {
@@ -237,7 +243,7 @@ function RelatorioClientes() {
                 {clientes.map((cliente) => (
                   <tr
                     key={cliente.id}
-                    onClick={() => setClienteSelecionado(cliente)}
+                    onClick={() => handleAbrirModal(cliente)}
                     className="cursor-pointer border-t border-border transition-colors hover:bg-muted/50"
                   >
                     <td className="px-4 py-3 font-mono text-xs font-semibold text-primary">
@@ -265,10 +271,11 @@ function RelatorioClientes() {
         )}
       </section>
 
-      {/* Modal / Pop-up de Detalhes do Cliente */}
+      {/* Modal / Pop-up de Detalhes do Cliente com Abas */}
       {clienteSelecionado && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm print:hidden">
           <div className="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl">
+            {/* Cabeçalho do Modal */}
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <span className="text-xs font-semibold uppercase text-primary">
@@ -285,35 +292,110 @@ function RelatorioClientes() {
               </button>
             </div>
 
-            <div className="mt-4 space-y-3 text-sm">
-              <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/20 p-3">
-                <div>
-                  <p className="text-xs text-muted-foreground">CPF / CNPJ</p>
-                  <p className="font-medium">{clienteSelecionado.cpfCnpj}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Telefone</p>
-                  <p className="font-medium">{clienteSelecionado.telefone}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground">E-mail de Contato</p>
-                <p className="font-medium">{clienteSelecionado.email}</p>
-              </div>
-
-              <div className="rounded-lg border border-border bg-muted/10 p-3">
-                <p className="mb-1 text-xs font-semibold text-muted-foreground">
-                  Resumo de Atividades
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  • 03 Operações cadastradas<br />
-                  • 01 Orçamento aprovado<br />
-                  • Status: <span className="font-semibold text-emerald-500">Ativo</span>
-                </p>
-              </div>
+            {/* Navegação por Abas */}
+            <div className="mt-4 flex border-b border-border text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => setAbaModal("geral")}
+                className={`border-b-2 px-3 py-2 transition-colors ${
+                  abaModal === "geral"
+                    ? "border-primary font-semibold text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Visão Geral
+              </button>
+              <button
+                type="button"
+                onClick={() => setAbaModal("historico")}
+                className={`border-b-2 px-3 py-2 transition-colors ${
+                  abaModal === "historico"
+                    ? "border-primary font-semibold text-foreground"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Histórico Detalhado
+              </button>
             </div>
 
+            {/* Conteúdo da Aba 1: Visão Geral */}
+            {abaModal === "geral" && (
+              <div className="mt-4 space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/20 p-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">CPF / CNPJ</p>
+                    <p className="font-medium">{clienteSelecionado.cpfCnpj}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Telefone</p>
+                    <p className="font-medium">{clienteSelecionado.telefone}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-muted-foreground">E-mail de Contato</p>
+                  <p className="font-medium">{clienteSelecionado.email}</p>
+                </div>
+
+                {/* Card do Resumo - Clicável para abrir o histórico */}
+                <div
+                  onClick={() => setAbaModal("historico")}
+                  className="group cursor-pointer rounded-lg border border-border bg-muted/10 p-3 transition-all hover:border-primary/50 hover:bg-muted/30"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-semibold text-muted-foreground group-hover:text-primary">
+                      Resumo de Atividades
+                    </p>
+                    <span className="text-[10px] text-muted-foreground group-hover:underline">
+                      Ver detalhes ➔
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground space-y-1">
+                    • 03 Operações cadastradas<br />
+                    • 01 Orçamento aprovado<br />
+                    • Status: <span className="font-semibold text-emerald-500">Ativo</span>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Conteúdo da Aba 2: Histórico Detalhado */}
+            {abaModal === "historico" && (
+              <div className="mt-4 space-y-4 text-xs">
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Operações Cadastradas</h4>
+                  <ul className="space-y-2">
+                    <li className="rounded-md border border-border bg-muted/20 p-2.5">
+                      <div className="flex justify-between font-medium">
+                        <span>#OP-2024-01 - Carga de Bobinas</span>
+                        <span className="text-emerald-500">Concluído</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Origem: Paranaguá-PR ➔ Destino: Curitiba-PR</p>
+                    </li>
+                    <li className="rounded-md border border-border bg-muted/20 p-2.5">
+                      <div className="flex justify-between font-medium">
+                        <span>#OP-2024-02 - Amarração em Contêiner</span>
+                        <span className="text-amber-500">Em Transporte</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Origem: Santos-SP ➔ Destino: Itajaí-SC</p>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">Orçamentos Aprovados</h4>
+                  <div className="rounded-md border border-border bg-muted/20 p-2.5">
+                    <div className="flex justify-between font-medium">
+                      <span>#ORC-884 - Serviço de Amarração Específica</span>
+                      <span className="font-bold text-foreground">R$ 14.500,00</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Aprovado em 02/10/2026</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Rodapé do Modal */}
             <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
               <button
                 type="button"
